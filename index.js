@@ -18,26 +18,26 @@ app.use(express.static('public'));
 const appointments = [];
 const feedbacks = [];
 
-app.get('/', function(req, res) {
+app.get('/', (req, res) => {
     res.render("Home")
 });
 
-app.get('/Patient', function(req, res) {
+app.get('/Patient', (req, res) => {
     res.render("Patient", { feedbacks })
 });
 
-app.get('/Doctor', function(req, res) {
+app.get('/Doctor', (req, res) => {
     res.render("Doctor", { appointments })
 });
 
-app.post('/queries', function(req, res) {
+app.post('/queries', (req, res) => {
     const queries = req.body.queries
     appointments.push(queries)
     // console.log(queries)
     res.redirect('patient')
 });
 
-app.post('/feedback', function(req, res) {
+app.post('/feedback', (req, res) => {
     const feedback = req.body.feedback
     feedbacks.push(feedback)
     // console.log(queries)
@@ -46,6 +46,6 @@ app.post('/feedback', function(req, res) {
 
 const PORT = process.env.PORT || 3018
 
-app.listen(PORT, function () {
+app.listen(PORT, () =>  {
 console.log(`App Running at port: ${PORT}`)
 });
