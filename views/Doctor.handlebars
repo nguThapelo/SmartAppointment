@@ -65,20 +65,52 @@ body {
 
 <div class="topnav" id="myTopnav">
   <a href="/" class="active">Home</a>
-  <a href="#appointments">Appointments</a>
-  <a href="#contact">Contact</a>
-  <a href="#about">About</a>
+  <a href="#">Welcome Dr + Username</a>
+  {{!-- <a href="#appointments">Appointments</a>
+  <a href="#contact">Chat with Patient</a>
+  <a href="#about">About</a> --}}
+  <a href="#">Logout</a>
   <a href="javascript:void(0);" class="icon" onclick="myFunction()">
     <i class="fa fa-bars"></i>
   </a>
 </div>
 
 <div style="padding-left:16px">
-  <h2>Get In touch with your favourite dermatologist online</h2>
-  <p>You have the ability to send them a message to book an appointment, 
-    <br> make a call and even video call them for consultation, 
-    <br> you can also check yourself if you have any skin problems.</p>
+  <h2 class="#appointments"> Appointments</h2>
+  <ul>
+  {{#each appointments}}
+  <li>
+    {{this}}
+  </li>
+
+{{/each}}
+</ul>
 </div>
+<hr>
+<h1>Chat with Patient</h1>
+
+<h4>
+  --------------direct to chat app 
+
+  Send Video Call request
+
+</h4>
+
+<hr>
+
+<h1>Give feedback, prescription</h1>
+
+<h4>What they need to do</h4>
+
+<hr>
+
+<h1>Map, weather  API</h1>
+
+<h4>just to be fancy</h4>
+
+
+
+
 
 <script>
 function myFunction() {

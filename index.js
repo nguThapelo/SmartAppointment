@@ -15,6 +15,8 @@ app.use(bodyParser.json())
 
 app.use(express.static('public'));
 
+const appointments = [];
+
 app.get('/', function(req, res) {
     res.render("Home")
 });
@@ -24,7 +26,15 @@ app.get('/Patient', function(req, res) {
 });
 
 app.get('/Doctor', function(req, res) {
-    res.render("Doctor")
+    res.render("Doctor", { appointments })
+});
+
+app.post('/queries', function(req, res) {
+    const queries = req.body.queries
+    appointments.push(queries)
+    
+    // console.log(queries)
+    res.redirect('patient')
 });
 
 const PORT = process.env.PORT || 3018

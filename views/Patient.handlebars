@@ -65,20 +65,49 @@ body {
 
 <div class="topnav" id="myTopnav">
   <a href="/" class="active">Home</a>
-  <a href="#appointment">Book Appointment</a>
-  <a href="#contact">Contact</a>
-  <a href="#">Self-Diagnosis</a>
+  <a href="#">Welcome + Username</a>
+  {{!-- <a href="#appointment">Book Appointment</a>
+  <a href="#contact">Chat With Doctor</a>
+  <a href="#">Self-Diagnosis</a> --}}
+  <a href="#">Logout</a>
   <a href="javascript:void(0);" class="icon" onclick="myFunction()">
     <i class="fa fa-bars"></i>
   </a>
 </div>
 
-<div style="padding-left:16px">
-  <h2>Get In touch with your favourite dermatologist online</h2>
-  <p>You have the ability to send them a message to book an appointment, 
-    <br> make a call and even video call them for consultation, 
-    <br> you can also check yourself if you have any skin problems.</p>
-</div>
+
+<h1>Book an Appointment</h1>
+need a confitmation message
+<h3>
+<form action="/queries" method="post">
+<label for="queries">Type : </label>
+<input type="text" id="queries" name="queries" placeholder="type in your appointment" />
+<button type="submit">Send</button>
+</form>
+</h3>
+
+<hr>
+<h1>Chat with your Doctor</h1>
+
+<h4>
+  --------------direct to chat app 
+
+</h4>
+
+<hr>
+
+<h1>Self-Diagnosis</h1>
+
+<h4>face recognition / machine learning</h4>
+
+<hr>
+
+<h1>Map, weather  API</h1>
+
+<h4>just to be fancy</h4>
+
+
+
 
 <script>
 function myFunction() {
@@ -89,6 +118,7 @@ function myFunction() {
     x.className = "topnav";
   }
 }
+
 </script>
 
 </body>
