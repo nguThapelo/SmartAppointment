@@ -1,70 +1,69 @@
-SmartAppointment
-SmartAppointment is a full-stack application built with Next.js, React, Express, and Apollo Server Micro for managing authentication and appointments. It uses Material UI for styling, Formik for forms, and integrates GraphQL for API queries and mutations.
+# SmartAppointment
 
-Features
-User authentication: login, registration, password change
+SmartAppointment is an appointment and service management platform for three user groups: administrators, service providers, and clients.
 
-Appointment creation and retrieval through GraphQL API
+## What the application does
 
-Responsive and modern UI with Material UI and Tailwind CSS
+- Manages accounts for clients and service providers
+- Supports role-based access and role-based dashboards
+- Allows clients to book services with providers
+- Lets providers review and approve or decline bookings
+- Tracks full booking lifecycle from booked to approved, paid, and completed
+- Supports dynamic service categories and sub-services
+- Supports dynamic reusable dropdown/reference values managed by admin
+- Supports payment method setup and payment tracking
+- Supports provider earnings and client spending summaries
+- Supports feedback question management and response submission
 
-TypeScript support for type safety
+## Roles and responsibilities
 
-Testing setup with Jest and React Testing Library
+### Admin
 
-Installation
-Clone the repository:
+- Full visibility across users, bookings, payments, and feedback
+- CRUD for users
+- CRUD for service categories and sub-services
+- CRUD for reusable master data values used in forms and dropdowns
+- CRUD for global feedback question sets and questions
 
-bash
-git clone https://github.com/nguThapelo/SmartAppointment.git
-cd SmartAppointment
-Install dependencies:
+### Provider
 
-bash
-npm install
-Available Scripts
-npm run dev
-Runs the development server using ts-node on server.ts.
+- Manages own pricing entries per service
+- Reviews and decides booking requests
+- Initiates payment for booked services
+- Monitors payment status and earnings
+- Manages provider-specific feedback questions
 
-npm run build
-Builds the Next.js app for production.
+### Client
 
-npm start
-Starts the production server from server.js.
+- Books appointments by category and sub-service
+- Manages own payment methods
+- Views spending summaries
+- Submits feedback after completed services
 
-npm test
-Runs tests using Jest.
+## Data model summary
 
-Technologies Used
-Next.js
+- User profiles and roles
+- Service categories and sub-services
+- Provider pricing records
+- Appointments with lifecycle and payment fields
+- Payment customers, payment methods, and payment transactions
+- Feedback question sets, questions, responses, and response items
+- Master data types and items for dynamic reusable form values
 
-React
+## Current business flow
 
-Apollo Server Micro & GraphQL
+1. Client selects service category and sub-service
+2. Client creates booking request
+3. Provider approves or declines
+4. Provider initiates payment
+5. Payment status is synchronized and booking moves to paid
+6. Provider marks service as completed
+7. Client submits feedback
 
-Express
+## Notes
 
-Material UI (MUI)
-
-Tailwind CSS
-
-TypeScript
-
-Formik & Yup
-
-Jest & React Testing Library
-
-Project Structure
-server.ts — Express + Apollo Server Micro backend entry point
-
-pages/ — Next.js frontend pages
-
-components/ — React UI components
-
-GraphQL schema and resolvers defining authentication and appointments
-
-Contributing
-Feel free to open issues or submit pull requests to improve the application.
-
-License
-ISC
+- Most forms and dashboards depend on active authentication.
+- If requests return unauthorized, sign out and sign back in to refresh role claims and access token.
+- Admin-only operations require an account with admin role metadata.
+- Development mode allows self-signed certificates by default to reduce local TLS issues.
+- To enforce strict TLS locally, set `ALLOW_SELF_SIGNED_TLS=false`.

@@ -2,6 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/login": "pages/login.js",
-  "/appointments": "pages/appointments.js"
+  "/AdminOperations": "pages/AdminOperations.js",
+  "/Dashboard": "pages/Dashboard.js"
 }
