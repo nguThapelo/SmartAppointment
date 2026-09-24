@@ -207,7 +207,18 @@ WhatsApp bookings: PENDING → APPROVED (auto, or admin/provider confirm) → CO
 
 ---
 
-## 9. Recommended implementation order
+## 9. Decisions (confirmed 2026-09-24)
+
+| Topic | Decision |
+|---|---|
+| Postgres | **Neon free tier** (Prisma; RDS remains a `DATABASE_URL` swap away) |
+| WhatsApp | **Meta WhatsApp Cloud API** (replaces Twilio) |
+| AI default provider | **Gemini free tier** via provider registry; Anthropic/OpenAI optional by key |
+| Starting point | WhatsApp work preserved on branch `whatsapp-bot-snapshot` (`25126e6`); rebuild on a new branch with a fresh Prisma schema + seed, no Supabase data migration |
+| Hosting / files | AWS Amplify Hosting + S3 (private, presigned URLs) |
+| Out of scope | Custom domain/TLS, WAF, Cognito, SQS, Secrets Manager, multi-env stacks |
+
+## 10. Recommended implementation order
 
 1. **Safety first (small, now):** commit the WhatsApp work to a branch, untrack `.next/`, remove the `/api/external` proxy and the open `/api/whatsapp/send`.
 2. **Scaffold:** App Router + TS, Prisma schema, `db.ts`/`s3.ts`, auth (session + roles in DB), security libs, logger, errors, CI, `amplify.yml`.
