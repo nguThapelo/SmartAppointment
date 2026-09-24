@@ -7,6 +7,12 @@ import { z } from "zod";
 
 export const id = z.string().trim().min(1).max(40).regex(/^[a-z0-9]+$/i, "Invalid id");
 
+/** A booking's internal id or its human reference (SA-XXXXXX). */
+export const bookingKey = z
+  .string()
+  .trim()
+  .regex(/^(SA-[0-9A-Z]{6}|[a-z0-9]{20,40})$/i, "Invalid booking reference");
+
 export const email = z
   .string()
   .trim()
