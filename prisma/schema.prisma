@@ -1,0 +1,588 @@
+// SmartAppointment data model. Design notes: docs/design/PHASE-2-DESIGN.md §4.
+// Constraints Prisma can't express (exclusion constraint, CHECKs, partial
+// unique indexes) are added in raw SQL at the end of the init migration.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PROVIDER
+  CLIENT
+}
+
+enum BookingChannel {
+  WEB
+  WHATSAPP
+  AGENT
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  PAYMENT_PENDING
+  PAID
+  PAYMENT_FAILED
+  COMPLETED
+  NO_SHOW
+  CANCELLED
+  CLOSED
+}
+
+enum PaymentMode {
+  ONLINE
+  ON_SITE
+}
+
+enum PricingType {
+  FIXED
+  HOURLY
+}
+
+enum PaymentStatus {
+  CREATED
+  PENDING
+  SUCCEEDED
+  FAILED
+  EXPIRED
+  REFUNDED
+}
+
+enum FeedbackScope {
+  GLOBAL
+  PROVIDER
+}
+
+enum AnswerType {
+  RATING_1_5
+  TEXT
+  YES_NO
+  SINGLE_CHOICE
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum AgentActionStatus {
+  PENDING
+  EXECUTED
+  CANCELLED
+  EXPIRED
+  FAILED
+}
+
+// ── Users & auth ────────────────────────────────────────────────────────────
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique // always stored lower-cased
+  passwordHash   String
+  firstName      String
+  lastName       String
+  phone          String?
+  role           Role      @default(CLIENT)
+  isActive       Boolean   @default(true)
+  sessionVersion Int       @default(0) // bump to revoke every session for this user
+  timezone       String    @default("Africa/Johannesburg")
+  aiEnabled      Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  passwordResets     PasswordResetToken[]
+  providerServices   ProviderService[]
+  availabilityRules  AvailabilityRule[]
+  availabilityOverrides AvailabilityOverride[]
+  clientBookings     Booking[]             @relation("ClientBookings")
+  providerBookings   Booking[]             @relation("ProviderBookings")
+  paymentsInitiated  Payment[]
+  whatsappChannels   WhatsAppChannel[]
+  feedbackSets       FeedbackQuestionSet[]
+  feedbackGiven      FeedbackResponse[]    @relation("FeedbackClient")
+  feedbackReceived   FeedbackResponse[]    @relation("FeedbackProvider")
+  bookingMessages    BookingMessage[]
+  files              FileAsset[]
+  agentConversations AgentConversation[]
+
+  @@index([role, isActive])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique // sha256 of the emailed token; the raw token is never stored
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ── Catalog & pricing ───────────────────────────────────────────────────────
+
+model ServiceCategory {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  isActive    Boolean      @default(true)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  subServices SubService[]
+}
+
+model SubService {
+  id               String            @id @default(cuid())
+  categoryId       String
+  category         ServiceCategory   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  name             String
+  description      String?
+  defaultDuration  Int               @default(60) // minutes
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  providerServices ProviderService[]
+
+  @@unique([categoryId, name])
+}
+
+model ProviderService {
+  id           String      @id @default(cuid())
+  providerId   String
+  provider     User        @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  subServiceId String
+  subService   SubService  @relation(fields: [subServiceId], references: [id], onDelete: Restrict)
+  pricingType  PricingType
+  rateCents    Int
+  currency     String      @default("ZAR")
+  durationMin  Int         @default(60)
+  paymentMode  PaymentMode @default(ONLINE)
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  bookings     Booking[]
+
+  @@unique([providerId, subServiceId])
+  @@index([subServiceId, isActive])
+}
+
+model MasterDataType {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  name        String
+  description String?
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  items       MasterDataItem[]
+}
+
+model MasterDataItem {
+  id        String         @id @default(cuid())
+  typeId    String
+  type      MasterDataType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  label     String
+  value     String
+  sortOrder Int            @default(0)
+  isActive  Boolean        @default(true)
+  metadata  Json           @default("{}")
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([typeId, value])
+}
+
+// ── Availability ────────────────────────────────────────────────────────────
+
+model AvailabilityRule {
+  id         String  @id @default(cuid())
+  providerId String
+  provider   User    @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  dayOfWeek  Int // 0 = Sunday … 6 = Saturday
+  opensAt    String // "HH:mm" in the provider's timezone
+  closesAt   String
+  isOpen     Boolean @default(true)
+
+  @@unique([providerId, dayOfWeek])
+}
+
+model AvailabilityOverride {
+  id         String   @id @default(cuid())
+  providerId String
+  provider   User     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  date       DateTime @db.Date
+  isClosed   Boolean  @default(false)
+  opensAt    String?
+  closesAt   String?
+  reason     String?
+
+  @@unique([providerId, date])
+}
+
+// ── Bookings ────────────────────────────────────────────────────────────────
+
+model Booking {
+  id                String           @id @default(cuid())
+  reference         String           @unique // e.g. SA-7K3P9Q — random, never sequential
+  channel           BookingChannel
+  status            BookingStatus    @default(PENDING)
+  providerId        String
+  provider          User             @relation("ProviderBookings", fields: [providerId], references: [id], onDelete: Restrict)
+  clientId          String?
+  client            User?            @relation("ClientBookings", fields: [clientId], references: [id], onDelete: SetNull)
+  customerName      String? // WhatsApp guests only
+  customerPhone     String?
+  customerEmail     String?
+  providerServiceId String
+  providerService   ProviderService  @relation(fields: [providerServiceId], references: [id], onDelete: Restrict)
+  serviceName       String // snapshot at creation
+  startsAt          DateTime
+  endsAt            DateTime
+  priceCents        Int // snapshot, server-computed — never client input
+  currency          String
+  paymentMode       PaymentMode
+  notes             String? // untrusted free text
+  declineReason     String?
+  cancelReason      String?
+  googleEventId     String?
+  whatsappChannelId String?
+  whatsappChannel   WhatsAppChannel? @relation(fields: [whatsappChannelId], references: [id], onDelete: SetNull)
+  version           Int              @default(0) // optimistic concurrency for transitions
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  transitions BookingTransition[]
+  payments    Payment[]
+  feedback    FeedbackResponse?
+  messages    BookingMessage[]
+  files       FileAsset[]
+
+  @@index([providerId, status, startsAt])
+  @@index([clientId, startsAt])
+  @@index([customerPhone])
+  @@index([status, startsAt])
+}
+
+model BookingTransition {
+  id         String         @id @default(cuid())
+  bookingId  String
+  booking    Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  fromStatus BookingStatus?
+  toStatus   BookingStatus
+  action     String
+  actorType  String // USER | WHATSAPP | AGENT | SYSTEM | WEBHOOK
+  actorId    String?
+  reason     String?
+  createdAt  DateTime       @default(now())
+
+  @@index([bookingId, createdAt])
+}
+
+model BookingMessage {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([bookingId, createdAt])
+}
+
+// ── Payments (Stripe test mode, Checkout) ───────────────────────────────────
+
+model Payment {
+  id                    String         @id @default(cuid())
+  bookingId             String
+  booking               Booking        @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  status                PaymentStatus  @default(CREATED)
+  amountCents           Int
+  currency              String
+  attempt               Int            @default(1)
+  stripeSessionId       String?        @unique
+  stripePaymentIntentId String?        @unique
+  checkoutUrl           String?
+  expiresAt             DateTime?
+  paidAt                DateTime?
+  failureReason         String?
+  initiatedById         String
+  initiatedBy           User           @relation(fields: [initiatedById], references: [id], onDelete: Restrict)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  events                PaymentEvent[]
+
+  @@unique([bookingId, attempt])
+  @@index([status, createdAt])
+}
+
+model PaymentEvent {
+  id        String   @id @default(cuid())
+  paymentId String
+  payment   Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  type      String
+  detail    Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([paymentId, createdAt])
+}
+
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  provider    String // "stripe" | "whatsapp"
+  externalId  String // Stripe event id / WhatsApp wamid
+  signatureOk Boolean
+  type        String?
+  processedAt DateTime?
+  error       String?
+  receivedAt  DateTime  @default(now())
+
+  @@unique([provider, externalId])
+  @@index([receivedAt])
+}
+
+model IdempotencyKey {
+  id           String   @id @default(cuid())
+  scope        String
+  key          String
+  requestHash  String
+  status       String // in_progress | completed | failed
+  httpStatus   Int?
+  responseJson String?
+  lockedAt     DateTime
+  expiresAt    DateTime
+
+  @@unique([scope, key])
+  @@index([expiresAt])
+}
+
+// ── Feedback ────────────────────────────────────────────────────────────────
+
+model FeedbackQuestionSet {
+  id        String             @id @default(cuid())
+  scope     FeedbackScope
+  ownerId   String? // required when scope = PROVIDER (CHECK in SQL)
+  owner     User?              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  title     String
+  isActive  Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  questions FeedbackQuestion[]
+
+  @@index([scope, isActive])
+  @@index([ownerId])
+}
+
+model FeedbackQuestion {
+  id         String              @id @default(cuid())
+  setId      String
+  set        FeedbackQuestionSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  text       String
+  answerType AnswerType
+  options    Json?
+  isRequired Boolean             @default(true)
+  sortOrder  Int                 @default(0)
+  answers    FeedbackAnswer[]
+
+  @@index([setId, sortOrder])
+}
+
+model FeedbackResponse {
+  id          String           @id @default(cuid())
+  bookingId   String           @unique
+  booking     Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  clientId    String
+  client      User             @relation("FeedbackClient", fields: [clientId], references: [id], onDelete: Cascade)
+  providerId  String
+  provider    User             @relation("FeedbackProvider", fields: [providerId], references: [id], onDelete: Restrict)
+  submittedAt DateTime         @default(now())
+  answers     FeedbackAnswer[]
+
+  @@index([providerId, submittedAt])
+  @@index([clientId, submittedAt])
+}
+
+model FeedbackAnswer {
+  id         String           @id @default(cuid())
+  responseId String
+  response   FeedbackResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  questionId String
+  question   FeedbackQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  value      String
+
+  @@unique([responseId, questionId])
+}
+
+// ── WhatsApp (Meta Cloud API) ───────────────────────────────────────────────
+
+model WhatsAppChannel {
+  id             String                 @id @default(cuid())
+  providerId     String
+  provider       User                   @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  phoneNumberId  String                 @unique // Meta phone_number_id — public, not a secret
+  displayNumber  String
+  name           String
+  welcomeMessage String
+  maxAdvanceDays Int                    @default(30)
+  autoApprove    Boolean                @default(true)
+  isActive       Boolean                @default(true)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  conversations  WhatsAppConversation[]
+  bookings       Booking[]
+}
+
+model WhatsAppConversation {
+  id            String            @id @default(cuid())
+  channelId     String
+  channel       WhatsAppChannel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  customerPhone String
+  customerName  String?
+  step          String            @default("IDLE")
+  session       Json              @default("{}")
+  lastInboundAt DateTime? // Meta's free 24h customer-service window
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  messages      WhatsAppMessage[]
+
+  @@unique([channelId, customerPhone])
+}
+
+model WhatsAppMessage {
+  id             String               @id @default(cuid())
+  conversationId String
+  conversation   WhatsAppConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  direction      MessageDirection
+  body           String
+  wamid          String?              @unique
+  createdAt      DateTime             @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+// ── Files (bytes live in S3; this is metadata only) ─────────────────────────
+
+model FileAsset {
+  id          String    @id @default(cuid())
+  key         String    @unique
+  ownerId     String
+  owner       User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  bookingId   String?
+  booking     Booking?  @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  fileName    String
+  contentType String
+  size        Int
+  uploadedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([bookingId])
+  @@index([ownerId])
+}
+
+// ── Audit, AI agent, rate limiting ──────────────────────────────────────────
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  actorType  String // USER | AGENT | WHATSAPP | SYSTEM | WEBHOOK
+  actorId    String?
+  actorRole  Role?
+  action     String // e.g. "booking.approve", "user.role_change"
+  entityType String
+  entityId   String?
+  outcome    String // success | denied | failed
+  requestId  String?
+  detail     Json     @default("{}") // redacted: never free text or secrets
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
+}
+
+model AgentConversation {
+  id        String               @id @default(cuid())
+  userId    String
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  messages  AgentMessage[]
+  toolCalls AgentToolCall[]
+  actions   AgentPendingAction[]
+
+  @@index([userId, updatedAt])
+}
+
+model AgentMessage {
+  id             String            @id @default(cuid())
+  conversationId String
+  conversation   AgentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String // user | assistant
+  content        String
+  createdAt      DateTime          @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model AgentToolCall {
+  id             String            @id @default(cuid())
+  conversationId String
+  conversation   AgentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  tool           String
+  kind           String // read | write
+  outcome        String // ok | denied | invalid | error | pending_confirmation
+  durationMs     Int
+  errorCategory  String?
+  createdAt      DateTime          @default(now())
+
+  @@index([userId, createdAt])
+  @@index([tool, outcome])
+}
+
+model AgentPendingAction {
+  id             String            @id @default(cuid())
+  conversationId String
+  conversation   AgentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  tool           String
+  argsJson       Json // already validated against the tool's schema
+  summary        String // server-written, shown on the confirm card
+  status         AgentActionStatus @default(PENDING)
+  resultJson     Json?
+  expiresAt      DateTime
+  createdAt      DateTime          @default(now())
+  resolvedAt     DateTime?
+
+  @@index([userId, status])
+}
+
+model AiUsage {
+  id           String   @id @default(cuid())
+  scope        String // "global" or a userId
+  day          DateTime @db.Date
+  requests     Int      @default(0)
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+
+  @@unique([scope, day])
+}
+
+model RateLimitBucket {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+
+  @@index([resetAt])
+}

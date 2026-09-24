@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main, rebuild]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smartappointment
+      DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smartappointment
+      SESSION_SECRET: ci-only-session-secret-not-used-anywhere-else
+      APP_URL: http://localhost:3000
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: smartappointment
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+      - run: npx prisma generate
+      # Proves the migrations (incl. hand-written constraints) apply to a clean DB.
+      - run: npx prisma migrate deploy
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  # Amplify Hosting is connected to `main` and deploys on push (see amplify.yml).

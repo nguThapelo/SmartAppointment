@@ -1,0 +1,30 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - nvm install 22 && nvm use 22
+        - npm ci
+        - npx prisma generate
+    build:
+      commands:
+        # Applies pending migrations using DIRECT_DATABASE_URL (Neon direct connection).
+        # Migrations are additive-only by policy — see docs/design §11 (rollback).
+        - npx prisma migrate deploy
+        # Amplify injects console env vars into the BUILD container only, not the
+        # SSR runtime, so the allow-listed ones are written into .env.production
+        # for Next.js to bundle into the compute function (briefcase pattern).
+        # AWS_* are reserved by Amplify and must NOT be set; S3 access comes from
+        # the SSR compute role instead of static keys.
+        - >-
+          env | grep -E '^(APP_URL|DATABASE_URL|DIRECT_DATABASE_URL|SESSION_SECRET|CRON_SECRET|S3_BUCKET_NAME|STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET|WHATSAPP_ACCESS_TOKEN|WHATSAPP_APP_SECRET|WHATSAPP_VERIFY_TOKEN|WHATSAPP_GRAPH_VERSION|AI_ENABLED|AI_ACTIVE_PROVIDER|AI_DAILY_USER_LIMIT|AI_DAILY_GLOBAL_LIMIT|GEMINI_API_KEY|ANTHROPIC_API_KEY|SMTP_HOST|SMTP_PORT|SMTP_USER|SMTP_PASS|SMTP_FROM|GOOGLE_CLIENT_ID|GOOGLE_CLIENT_SECRET|GOOGLE_REFRESH_TOKEN|GOOGLE_CALENDAR_ID)='
+          >> .env.production || true
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
