@@ -164,6 +164,16 @@ describe("access control on existing bookings (IDOR)", () => {
     expect((await get(s.client.token, s.booking.id)).body.customer.email).toBeNull();
   });
 
+  it("'upcoming' leaves out cancelled bookings unless asked for", async () => {
+    const s = await scenario();
+    await action(s.client.token, s.booking.id, "cancel");
+    const list = async (query: Record<string, string>) =>
+      (await call(listBookings, "/api/bookings", { token: s.client.token, query })).body.total;
+    expect(await list({ scope: "upcoming" })).toBe(0);
+    expect(await list({ scope: "upcoming", status: "CANCELLED" })).toBe(1);
+    expect(await list({ scope: "all" })).toBe(1);
+  });
+
   it("lists are scoped to the caller", async () => {
     const s = await scenario();
     const admin = await createUser("ADMIN");

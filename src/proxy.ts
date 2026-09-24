@@ -7,7 +7,9 @@ import { jwtVerify } from "jose";
 // re-resolves the user and role from the database (src/server/auth).
 
 const SESSION_COOKIE = "sa_session";
-const PROTECTED_PREFIXES = ["/client", "/provider", "/admin", "/account"];
+const PROTECTED_PREFIXES = [
+  "/dashboard", "/book", "/bookings", "/provider", "/admin", "/inbox", "/feedback", "/earnings", "/assistant", "/account",
+];
 
 async function hasSignedSession(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE)?.value;
@@ -34,5 +36,8 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/client/:path*", "/provider/:path*", "/admin/:path*", "/account/:path*"],
+  matcher: [
+    "/dashboard/:path*", "/book/:path*", "/bookings/:path*", "/provider/:path*", "/admin/:path*",
+    "/inbox/:path*", "/feedback/:path*", "/earnings/:path*", "/assistant/:path*", "/account/:path*",
+  ],
 };

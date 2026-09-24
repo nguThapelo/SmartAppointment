@@ -7,7 +7,9 @@ import bcrypt from "bcryptjs";
 // replaces the old runtime /api/bootstrap/promote-admin route entirely — there
 // is no HTTP path that can create or promote an admin without an existing one.
 //
-// Demo catalog/providers are added in a later step (SEED_DEMO=true).
+// With SEED_DEMO=true it also loads demo data (prisma/demo.ts).
+
+import { seedDemo } from "./demo";
 
 const prisma = new PrismaClient();
 
@@ -45,6 +47,8 @@ async function main() {
     });
     console.log(`Created admin ${email}`);
   }
+
+  if (process.env.SEED_DEMO === "true") await seedDemo(prisma);
 }
 
 main()

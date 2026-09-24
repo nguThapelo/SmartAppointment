@@ -88,7 +88,13 @@ export async function listForActor(actor: ServiceActor, q: z.infer<typeof bookin
   const where: Prisma.BookingWhereInput = {
     ...visibilityFilter(actor),
     ...(q.status ? { status: q.status } : {}),
-    ...(q.scope === "upcoming" ? { startsAt: { gte: now } } : q.scope === "past" ? { startsAt: { lt: now } } : {}),
+    // "Upcoming" means still going ahead: cancelled/declined/no-show bookings are excluded
+    // unless a status is asked for explicitly.
+    ...(q.scope === "upcoming"
+      ? { startsAt: { gte: now }, ...(q.status ? {} : { status: { notIn: ["CANCELLED", "DECLINED", "NO_SHOW"] as BookingStatus[] } }) }
+      : q.scope === "past"
+        ? { startsAt: { lt: now } }
+        : {}),
   };
   const [total, rows] = await prisma.$transaction([
     prisma.booking.count({ where }),

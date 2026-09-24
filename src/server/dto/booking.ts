@@ -10,6 +10,8 @@ export interface BookingDTO {
   channel: Booking["channel"];
   status: Booking["status"];
   serviceName: string;
+  /** Opaque id of the provider's service offering (used to fetch reschedule slots). */
+  providerServiceId: string;
   startsAt: string;
   endsAt: string;
   priceCents: number;
@@ -34,6 +36,7 @@ export function toBookingDTO(b: BookingWithPeople, party: Party): BookingDTO {
     channel: b.channel,
     status: b.status,
     serviceName: b.serviceName,
+    providerServiceId: b.providerServiceId,
     startsAt: b.startsAt.toISOString(),
     endsAt: b.endsAt.toISOString(),
     priceCents: b.priceCents,
