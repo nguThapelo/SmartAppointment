@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Pencil, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, IconButton } from "@/components/ui/button";
 import { Card, PageHeader } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState, ErrorNote, Loading } from "@/components/ui/feedback";
@@ -99,10 +99,8 @@ export function ServicesManager() {
                     <td className="px-5 py-3">{s.paymentMode === "ONLINE" ? "Online" : "On site"}</td>
                     <td className="px-5 py-3"><Badge tone={s.isActive ? "success" : "neutral"}>{s.isActive ? "Bookable" : "Hidden"}</Badge></td>
                     <td className="px-5 py-3 text-right">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        aria-label={`Edit ${s.serviceName}`}
+                      <IconButton
+                        label={`Edit ${s.serviceName}`}
                         icon={<Pencil className="size-4" />}
                         onClick={() => {
                           save.reset();

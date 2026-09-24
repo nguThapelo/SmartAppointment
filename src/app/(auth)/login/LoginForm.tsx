@@ -30,7 +30,7 @@ export function LoginForm({ next, expired }: { next: string; expired: boolean })
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <div>
-        <h1 className="text-xl font-semibold text-ink-900">Sign in</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-ink-900">Sign in</h1>
         <p className="mt-1 text-sm text-ink-500">Welcome back.</p>
       </div>
       {expired && <Notice tone="warning">Your session expired. Please sign in again.</Notice>}
@@ -41,12 +41,12 @@ export function LoginForm({ next, expired }: { next: string; expired: boolean })
       <Field label="Password">
         {(p) => <Input {...p} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}
       </Field>
-      <Button type="submit" loading={pending} className="w-full">
+      <Button type="submit" size="lg" loading={pending} className="w-full">
         Sign in
       </Button>
       <div className="flex justify-between text-sm">
-        <Link href="/forgot-password" className="text-brand-700 hover:underline">Forgot password?</Link>
-        <Link href="/register" className="text-brand-700 hover:underline">Create account</Link>
+        <Link href="/forgot-password" className="font-semibold text-brand-700 hover:text-brand-800 hover:underline">Forgot password?</Link>
+        <Link href="/register" className="font-semibold text-brand-700 hover:text-brand-800 hover:underline">Create account</Link>
       </div>
     </form>
   );

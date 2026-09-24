@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, IconButton } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, PageHeader } from "@/components/ui/card";
 import { ErrorNote, Loading } from "@/components/ui/feedback";
 import { Field, Input } from "@/components/ui/form";
@@ -133,7 +133,7 @@ export function AvailabilityEditor() {
                       <p className="font-medium text-ink-800">{new Date(`${o.date}T12:00:00Z`).toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })}</p>
                       <p className="text-ink-500">{o.isClosed ? "Closed" : `${o.opensAt}–${o.closesAt}`}{o.reason ? ` · ${o.reason}` : ""}</p>
                     </div>
-                    <Button size="sm" variant="ghost" aria-label="Remove exception" icon={<Trash2 className="size-4" />} loading={removeOverride.isPending && removeOverride.variables === o.id} onClick={() => removeOverride.mutate(o.id)} />
+                    <IconButton label="Remove exception" tone="danger" icon={<Trash2 className="size-4" />} loading={removeOverride.isPending && removeOverride.variables === o.id} onClick={() => removeOverride.mutate(o.id)} />
                   </li>
                 ))}
               </ul>

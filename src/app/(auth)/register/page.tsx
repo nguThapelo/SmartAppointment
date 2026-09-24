@@ -35,7 +35,7 @@ export default function RegisterPage() {
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <div>
-        <h1 className="text-xl font-semibold text-ink-900">Create your account</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-ink-900">Create your account</h1>
         <p className="mt-1 text-sm text-ink-500">Book appointments in a couple of taps.</p>
       </div>
       {error && <ErrorNote message={error} />}
@@ -56,9 +56,9 @@ export default function RegisterPage() {
       <Field label="Password" hint="At least 10 characters." error={errors.password}>
         {(p) => <Input {...p} type="password" autoComplete="new-password" required value={form.password} onChange={set("password")} />}
       </Field>
-      <Button type="submit" loading={pending} className="w-full">Create account</Button>
+      <Button type="submit" size="lg" loading={pending} className="w-full">Create account</Button>
       <p className="text-center text-sm text-ink-500">
-        Already have an account? <Link href="/login" className="text-brand-700 hover:underline">Sign in</Link>
+        Already have an account? <Link href="/login" className="font-semibold text-brand-700 hover:text-brand-800 hover:underline">Sign in</Link>
       </p>
     </form>
   );

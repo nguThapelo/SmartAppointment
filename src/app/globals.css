@@ -1,28 +1,96 @@
 @import "tailwindcss";
 
-/* SmartAppointment design tokens. Ink + teal: calm, trustworthy, readable. */
+/* ─────────────────────────────────────────────────────────────────────────
+   SmartAppointment design system
+   Ink neutrals + teal brand, cyan highlight, violet for everything AI.
+   Layered soft shadows; brand-tinted glows on primary actions.
+   ───────────────────────────────────────────────────────────────────────── */
 @theme {
-  --color-ink-50: #f7f8fa;
-  --color-ink-100: #eef0f4;
-  --color-ink-200: #dde1e8;
-  --color-ink-300: #c3c9d4;
-  --color-ink-400: #8b94a5;
-  --color-ink-500: #5f6879;
-  --color-ink-600: #444c5c;
-  --color-ink-700: #313846;
-  --color-ink-800: #1f2430;
-  --color-ink-900: #121620;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  --color-brand-50: #effcf9;
-  --color-brand-100: #c9f5eb;
-  --color-brand-200: #94ead8;
-  --color-brand-500: #14a38b;
-  --color-brand-600: #0e8573;
-  --color-brand-700: #0f6a5e;
-  --color-brand-800: #11554c;
+  --color-ink-50: #f7f8fb;
+  --color-ink-100: #eef0f5;
+  --color-ink-200: #dfe3eb;
+  --color-ink-300: #c3c9d6;
+  --color-ink-400: #8a93a6;
+  --color-ink-500: #5e6779;
+  --color-ink-600: #444c5e;
+  --color-ink-700: #30374a;
+  --color-ink-800: #1d2233;
+  --color-ink-900: #11141f;
+  --color-ink-950: #0a0c14;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --radius-card: 0.875rem;
+  --color-brand-50: #edfdf9;
+  --color-brand-100: #c8f7ec;
+  --color-brand-200: #93ecd8;
+  --color-brand-300: #5cdcc1;
+  --color-brand-400: #2cc6a8;
+  --color-brand-500: #13a88e;
+  --color-brand-600: #0c8a76;
+  --color-brand-700: #0e6e61;
+  --color-brand-800: #10584f;
+  --color-brand-900: #0f4841;
+
+  --color-accent-50: #f5f3ff;
+  --color-accent-100: #ede9fe;
+  --color-accent-400: #a78bfa;
+  --color-accent-500: #8b5cf6;
+  --color-accent-600: #7c3aed;
+  --color-accent-700: #6d28d9;
+
+  --radius-card: 1rem;
+
+  /* Layered shadows: a tight contact shadow + a soft ambient one. */
+  --shadow-soft: 0 1px 2px rgb(17 20 31 / 0.04), 0 2px 8px -2px rgb(17 20 31 / 0.06);
+  --shadow-card: 0 1px 2px rgb(17 20 31 / 0.04), 0 8px 24px -8px rgb(17 20 31 / 0.10);
+  --shadow-lift: 0 2px 4px rgb(17 20 31 / 0.05), 0 18px 40px -12px rgb(17 20 31 / 0.18);
+  --shadow-pop: 0 10px 38px -10px rgb(17 20 31 / 0.35), 0 10px 20px -15px rgb(17 20 31 / 0.2);
+  --shadow-glow: 0 8px 24px -6px rgb(19 168 142 / 0.45);
+  --shadow-glow-accent: 0 8px 24px -6px rgb(124 58 237 / 0.45);
+
+  --animate-fade-up: fade-up 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-toast-in: toast-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  --animate-pop-in: pop-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-slide-in-right: slide-in-right 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-slide-in-left: slide-in-left 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateX(24px) scale(0.96); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateY(4px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes slide-in-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes slide-in-left {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+}
+
+/* Toast auto-hide progress bar (used via inline style). */
+@keyframes toast-progress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
 }
 
 html {
@@ -34,13 +102,63 @@ body {
   color: var(--color-ink-800);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+::selection {
+  background: var(--color-brand-100);
+  color: var(--color-brand-900);
 }
 
 /* Visible, consistent keyboard focus everywhere. */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--color-brand-500);
   outline-offset: 2px;
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
+}
+
+/* ── Reusable surfaces ──────────────────────────────────────────────────── */
+@utility bg-brand-gradient {
+  background-image: linear-gradient(135deg, var(--color-brand-500) 0%, #0ea5b7 100%);
+}
+@utility bg-accent-gradient {
+  background-image: linear-gradient(135deg, var(--color-accent-500) 0%, #d946ef 100%);
+}
+@utility bg-hero-gradient {
+  background-image:
+    radial-gradient(60rem 30rem at 10% -10%, rgb(19 168 142 / 0.18), transparent 60%),
+    radial-gradient(50rem 30rem at 95% 0%, rgb(124 58 237 / 0.14), transparent 60%),
+    radial-gradient(40rem 25rem at 50% 110%, rgb(14 165 183 / 0.12), transparent 60%);
+}
+@utility bg-sidebar-gradient {
+  background-image: linear-gradient(180deg, #121827 0%, #0c111c 100%);
+}
+@utility text-gradient {
+  background-image: linear-gradient(120deg, var(--color-brand-500), #0ea5b7 45%, var(--color-accent-500));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility bg-dots {
+  background-image: radial-gradient(rgb(17 20 31 / 0.07) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+@utility skeleton {
+  background: linear-gradient(90deg, var(--color-ink-100) 25%, var(--color-ink-50) 50%, var(--color-ink-100) 75%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* Thin, quiet scrollbars inside panels. */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-200) transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -48,6 +166,7 @@ body {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

@@ -33,19 +33,19 @@ function ResetForm() {
     return (
       <div className="space-y-4">
         <Notice tone="success">Your password was changed. You’ve been signed out of other devices.</Notice>
-        <Link href="/login" className="block text-center text-sm text-brand-700 hover:underline">Sign in</Link>
+        <Link href="/login" className="block text-center text-sm font-semibold text-brand-700 hover:text-brand-800 hover:underline">Sign in</Link>
       </div>
     );
   }
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
-      <h1 className="text-xl font-semibold text-ink-900">Choose a new password</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-ink-900">Choose a new password</h1>
       {!token && <ErrorNote message="This link is incomplete. Request a new one." />}
       {error && <ErrorNote message={error} />}
       <Field label="New password" hint="At least 10 characters.">
         {(p) => <Input {...p} type="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}
       </Field>
-      <Button type="submit" loading={pending} disabled={!token} className="w-full">Set password</Button>
+      <Button type="submit" size="lg" loading={pending} disabled={!token} className="w-full">Set password</Button>
     </form>
   );
 }

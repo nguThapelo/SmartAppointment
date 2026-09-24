@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 import { CreditCard, FileText, Paperclip, Send, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, IconButton } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState, ErrorNote, Notice, Skeleton } from "@/components/ui/feedback";
@@ -70,7 +70,7 @@ export function PaymentPanel({ booking, isCustomer }: { booking: BookingDTO; isC
           <a
             href={p.checkoutUrl}
             rel="noopener noreferrer"
-            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 text-sm font-medium text-white hover:bg-brand-700"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient text-[15px] font-semibold text-white shadow-glow transition-all hover:-translate-y-px hover:brightness-105"
           >
             <CreditCard className="size-4" /> Pay {money(p.amountCents, p.currency)} securely
           </a>
@@ -201,7 +201,7 @@ export function ChatPanel({ booking, canPost }: { booking: BookingDTO; canPost: 
             placeholder="Write a message…"
             className="h-10 flex-1 rounded-lg border border-ink-200 px-3 text-sm focus:border-brand-500"
           />
-          <Button type="submit" loading={post.isPending} disabled={!text.trim()} aria-label="Send" icon={<Send className="size-4" />} />
+          <IconButton label="Send message" type="submit" tone="brand" loading={post.isPending} disabled={!text.trim()} icon={<Send className="size-4" />} />
         </form>
       )}
       {post.error && <div className="px-3 pb-3"><ErrorNote message={errorMessage(post.error)} /></div>}

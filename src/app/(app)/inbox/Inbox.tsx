@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { MessageCircle, Plus, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, IconButton } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, PageHeader } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState, ErrorNote, Loading, Notice } from "@/components/ui/feedback";
@@ -129,7 +129,7 @@ function Conversations() {
               <form onSubmit={onSubmit} className="flex gap-2 border-t border-ink-100 p-3">
                 <label htmlFor="wa-reply" className="sr-only">Reply</label>
                 <input id="wa-reply" value={reply} maxLength={1000} onChange={(e) => setReply(e.target.value)} placeholder="Type a reply…" className="h-10 flex-1 rounded-lg border border-ink-200 px-3 text-sm focus:border-brand-500" />
-                <Button type="submit" loading={send.isPending} disabled={!reply.trim()} icon={<Send className="size-4" />} aria-label="Send" />
+                <IconButton label="Send reply" type="submit" tone="brand" loading={send.isPending} disabled={!reply.trim()} icon={<Send className="size-4" />} />
               </form>
             ) : (
               <div className="border-t border-ink-100 p-3"><Notice>Replies are only possible within 24 hours of the customer’s last message (WhatsApp’s free service window).</Notice></div>

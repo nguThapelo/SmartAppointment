@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <div>
-        <h1 className="text-xl font-semibold text-ink-900">Reset your password</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-ink-900">Reset your password</h1>
         <p className="mt-1 text-sm text-ink-500">We’ll email you a link that works for 30 minutes.</p>
       </div>
       {done ? (
@@ -41,10 +41,10 @@ export default function ForgotPasswordPage() {
           <Field label="Email">
             {(p) => <Input {...p} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />}
           </Field>
-          <Button type="submit" loading={pending} className="w-full">Send reset link</Button>
+          <Button type="submit" size="lg" loading={pending} className="w-full">Send reset link</Button>
         </>
       )}
-      <p className="text-center text-sm"><Link href="/login" className="text-brand-700 hover:underline">Back to sign in</Link></p>
+      <p className="text-center text-sm"><Link href="/login" className="font-semibold text-brand-700 hover:text-brand-800 hover:underline">Back to sign in</Link></p>
     </form>
   );
 }
