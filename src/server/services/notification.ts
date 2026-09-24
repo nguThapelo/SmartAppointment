@@ -48,8 +48,18 @@ export async function notifyBooking(bookingId: string, event: BookingEvent, extr
 
     const recipients: { email: string; name: string }[] = [];
     if (copy.to.includes("customer")) {
+      // WhatsApp guests hear back in the chat when inside Meta's free 24h
+      // window; otherwise (or if that fails) by email when they gave one.
+      let reached = false;
+      if (b.channel === "WHATSAPP") {
+        const { notifyGuest } = await import("@/server/whatsapp/service");
+        reached = await notifyGuest(
+          b.id,
+          `${copy.subject}: ${b.serviceName}, ${when} (${b.reference}).${extra?.link ? `\n\nPay here: ${extra.link}` : ""}`,
+        );
+      }
       const email = b.client?.email ?? b.customerEmail;
-      if (email) recipients.push({ email, name: b.client?.firstName ?? b.customerName ?? "there" });
+      if (!reached && email) recipients.push({ email, name: b.client?.firstName ?? b.customerName ?? "there" });
     }
     if (copy.to.includes("provider")) recipients.push({ email: b.provider.email, name: b.provider.firstName });
 
