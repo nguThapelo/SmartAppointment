@@ -67,3 +67,10 @@ SmartAppointment is an appointment and service management platform for three use
 - Admin-only operations require an account with admin role metadata.
 - Development mode allows self-signed certificates by default to reduce local TLS issues.
 - To enforce strict TLS locally, set `ALLOW_SELF_SIGNED_TLS=false`.
+
+
+
+## to expand the app
+- when they book an appointment for a certain service, 
+they must fill a membership form for that service, like if it is a doctor's appointment the membership form must have all needed details, medical hsitory, personal details, addresses, medical aid,  (different membershipt for per service), like in a salon you'd have a allergies, previous illenesses, diet, so forth. us AI agent to suggest solutions for these appointments, like a dietecian would give you tips based on the info you added on the membership form, also add insurance, all types as a service
+

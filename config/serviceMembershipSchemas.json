@@ -1,0 +1,188 @@
+{
+  "profiles": {
+    "default": {
+      "title": "Membership Profile",
+      "description": "General intake covering identity, contact info, and preferences.",
+      "sections": [
+        {
+          "title": "Personal Details",
+          "fields": [
+            { "name": "personal.fullName", "label": "Full Name", "type": "text", "required": true },
+            { "name": "personal.dateOfBirth", "label": "Date of Birth", "type": "date" },
+            { "name": "personal.gender", "label": "Gender", "type": "select", "options": ["Female", "Male", "Non-binary", "Prefer not to say"] }
+          ]
+        },
+        {
+          "title": "Contact & Address",
+          "fields": [
+            { "name": "contact.email", "label": "Email", "type": "text" },
+            { "name": "contact.phone", "label": "Phone", "type": "text" },
+            { "name": "contact.addressLine1", "label": "Address Line 1", "type": "text" },
+            { "name": "contact.city", "label": "City", "type": "text" },
+            { "name": "contact.country", "label": "Country", "type": "text" }
+          ]
+        },
+        {
+          "title": "Preferences",
+          "fields": [
+            { "name": "preferences.notes", "label": "General Notes", "type": "textarea", "rows": 3 }
+          ]
+        }
+      ]
+    },
+    "medical": {
+      "title": "Medical Membership Form",
+      "description": "Capture comprehensive patient history for medical services.",
+      "sections": [
+        {
+          "title": "Personal & Contact",
+          "fields": [
+            { "name": "personal.fullName", "label": "Full Name", "type": "text", "required": true },
+            { "name": "personal.idNumber", "label": "ID/Passport Number", "type": "text" },
+            { "name": "contact.address", "label": "Residential Address", "type": "textarea", "rows": 2 },
+            { "name": "contact.emergencyContact", "label": "Emergency Contact Name", "type": "text" },
+            { "name": "contact.emergencyPhone", "label": "Emergency Contact Phone", "type": "text" }
+          ]
+        },
+        {
+          "title": "Medical Aid & Cover",
+          "fields": [
+            { "name": "medicalAid.provider", "label": "Medical Aid Provider", "type": "text" },
+            { "name": "medicalAid.plan", "label": "Plan/Option", "type": "text" },
+            { "name": "medicalAid.memberNumber", "label": "Membership Number", "type": "text" }
+          ]
+        },
+        {
+          "title": "Medical History",
+          "fields": [
+            { "name": "history.conditions", "label": "Chronic Conditions", "type": "textarea", "rows": 3 },
+            { "name": "history.surgeries", "label": "Past Surgeries/Hospitalisations", "type": "textarea", "rows": 3 },
+            { "name": "history.allergies", "label": "Allergies", "type": "textarea", "rows": 2 },
+            { "name": "history.medications", "label": "Current Medications", "type": "textarea", "rows": 3 }
+          ]
+        },
+        {
+          "title": "Lifestyle",
+          "fields": [
+            { "name": "lifestyle.smoking", "label": "Do you smoke?", "type": "select", "options": ["No", "Occasionally", "Daily"] },
+            { "name": "lifestyle.alcohol", "label": "Alcohol consumption", "type": "select", "options": ["Never", "Occasional", "Weekly", "Daily"] },
+            { "name": "lifestyle.activityLevel", "label": "Activity Level", "type": "select", "options": ["Sedentary", "Light", "Moderate", "Intense"] }
+          ]
+        }
+      ]
+    },
+    "salon": {
+      "title": "Salon & Beauty Profile",
+      "description": "Understand sensitivities and style history for personalised treatments.",
+      "sections": [
+        {
+          "title": "Allergies & Sensitivities",
+          "fields": [
+            { "name": "health.allergies", "label": "Known Allergies", "type": "textarea", "rows": 3 },
+            { "name": "health.skinSensitivities", "label": "Skin Sensitivities", "type": "textarea", "rows": 2 },
+            { "name": "health.previousIllnesses", "label": "Previous Illnesses", "type": "textarea", "rows": 2 }
+          ]
+        },
+        {
+          "title": "Skin & Hair Profile",
+          "fields": [
+            { "name": "profile.skinType", "label": "Skin Type", "type": "select", "options": ["Normal", "Dry", "Oily", "Combination", "Sensitive"] },
+            { "name": "profile.hairType", "label": "Hair Type", "type": "select", "options": ["Straight", "Wavy", "Curly", "Coily"] },
+            { "name": "profile.hairHistory", "label": "Color/Chemical History", "type": "textarea", "rows": 2 }
+          ]
+        },
+        {
+          "title": "Lifestyle",
+          "fields": [
+            { "name": "lifestyle.dietPreferences", "label": "Diet Preferences", "type": "textarea", "rows": 2 },
+            { "name": "lifestyle.productsUsed", "label": "Products Currently Used", "type": "textarea", "rows": 2 }
+          ]
+        }
+      ]
+    },
+    "dietician": {
+      "title": "Dietician Intake",
+      "description": "Nutritional baseline to tailor personalised plans.",
+      "sections": [
+        {
+          "title": "Current Routine",
+          "fields": [
+            { "name": "current.diet", "label": "Describe your current diet", "type": "textarea", "rows": 3 },
+            { "name": "current.mealsPerDay", "label": "Meals per day", "type": "number" },
+            { "name": "current.waterIntake", "label": "Water intake (L/day)", "type": "number" }
+          ]
+        },
+        {
+          "title": "Goals & History",
+          "fields": [
+            { "name": "goals.weight", "label": "Weight goals", "type": "textarea", "rows": 2 },
+            { "name": "history.weightChanges", "label": "Recent weight changes", "type": "textarea", "rows": 2 },
+            { "name": "history.medicalConditions", "label": "Medical conditions", "type": "textarea", "rows": 3 }
+          ]
+        },
+        {
+          "title": "Constraints",
+          "fields": [
+            { "name": "constraints.foodAllergies", "label": "Food allergies", "type": "textarea", "rows": 2 },
+            { "name": "constraints.intolerances", "label": "Intolerances", "type": "textarea", "rows": 2 },
+            { "name": "constraints.exerciseHabits", "label": "Exercise habits", "type": "textarea", "rows": 2 }
+          ]
+        }
+      ]
+    },
+    "insurance": {
+      "title": "Insurance Membership Form",
+      "description": "Capture policy, beneficiary, and claims insights.",
+      "sections": [
+        {
+          "title": "Policy Details",
+          "fields": [
+            { "name": "policy.provider", "label": "Carrier", "type": "text", "required": true },
+            { "name": "policy.policyNumber", "label": "Policy Number", "type": "text", "required": true },
+            { "name": "policy.coverageTypes", "label": "Coverage Types", "type": "textarea", "rows": 3 }
+          ]
+        },
+        {
+          "title": "Beneficiaries",
+          "fields": [
+            { "name": "beneficiaries.primary", "label": "Primary Beneficiary", "type": "text" },
+            { "name": "beneficiaries.secondary", "label": "Secondary Beneficiaries", "type": "textarea", "rows": 2 },
+            { "name": "beneficiaries.relationships", "label": "Relationships", "type": "textarea", "rows": 2 }
+          ]
+        },
+        {
+          "title": "Claims History",
+          "fields": [
+            { "name": "claims.pastClaims", "label": "Past Claims", "type": "textarea", "rows": 3 },
+            { "name": "claims.openClaims", "label": "Open Claims", "type": "textarea", "rows": 2 },
+            { "name": "claims.notes", "label": "Notes", "type": "textarea", "rows": 2 }
+          ]
+        }
+      ]
+    }
+  },
+  "categoryMap": {
+    "healthcare & wellness": "medical",
+    "beauty & grooming": "salon",
+    "fitness & coaching": "dietician",
+    "insurance & policy management": "insurance",
+    "insurance": "insurance"
+  },
+  "subTypeMap": {
+    "doctor consultations": "medical",
+    "vaccinations, blood tests, clinic visits": "medical",
+    "physiotherapy, chiropractic, massage": "medical",
+    "mental health counseling/teletherapy": "medical",
+    "haircuts, coloring, styling": "salon",
+    "manicures, pedicures, nail art": "salon",
+    "facials, waxing, lash extensions, makeup": "salon",
+    "barber appointments, beard grooming": "salon",
+    "personal training": "dietician",
+    "gym/studio classes (yoga, pilates, hiit)": "dietician",
+    "sports coaching (football, tennis, swimming)": "dietician",
+    "online fitness/nutrition coaching": "dietician",
+    "dietician": "dietician",
+    "insurance": "insurance",
+    "policy management": "insurance"
+  }
+}
