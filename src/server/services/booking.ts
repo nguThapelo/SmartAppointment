@@ -54,7 +54,8 @@ export function partyFor(
 const byIdOrReference = (idOrRef: string): Prisma.BookingWhereInput =>
   /^SA-/i.test(idOrRef) ? { reference: idOrRef.toUpperCase() } : { id: idOrRef };
 
-async function loadVisible(actor: ServiceActor, idOrRef: string, db: Tx | typeof prisma = prisma) {
+/** Load a booking the actor may see, with their relationship to it; 404 otherwise. */
+export async function loadVisible(actor: ServiceActor, idOrRef: string, db: Tx | typeof prisma = prisma) {
   const b = await db.booking.findFirst({ where: byIdOrReference(idOrRef), include: PEOPLE });
   const party = b ? partyFor(actor, b) : null;
   if (!b || !party) throw notFound("Booking");
