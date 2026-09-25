@@ -1,4 +1,4 @@
-# SmartAppointment — Phase 1 Audit & Plan
+# Appointment Hub — Phase 1 Audit & Plan
 
 _Audit date: 2026-09-24 · Scope: committed app (`HEAD` = `ceabcdc`) + uncommitted WhatsApp bot in the working tree · No code was changed in this phase._
 
@@ -65,7 +65,7 @@ Bot statuses: `pending, confirmed, cancelled, rescheduled, completed, no_show`. 
 
 ## 3. Security findings
 
-Severity is judged for a public portfolio deployment where anyone can register.
+Severity is judged for a public deployment where anyone can register.
 
 ### Critical
 
@@ -103,7 +103,7 @@ Severity is judged for a public portfolio deployment where anyone can register.
 | M-5 | `feedback.js` `GET /questions` | Any role can read any question set by ID, including another provider's private set. | Scope by set ownership. |
 | M-6 | `admin.js` `PUT /users/:id`, `PUT /bookings/:id` | Replaces all metadata or writes the raw body. | Typed DTOs + audit event. |
 | M-7 | Everywhere | `error.message` from DB/Stripe is returned to the client. | Generic message + request ID. Detailed log server-side. |
-| M-8 | Everywhere | No rate limiting on login, register, AI or webhooks. | peach-payment `rateLimit` (in-memory per Lambda; good enough for a portfolio). |
+| M-8 | Everywhere | No rate limiting on login, register, AI or webhooks. | peach-payment `rateLimit` (adapted to a Postgres-backed store for serverless). |
 | M-9 | Everywhere | No audit trail for role changes, status transitions or payments. | `AuditEvent` + `BookingTransition` tables. |
 
 ### Low
@@ -140,7 +140,7 @@ Design, copied from ReportReviewAssist `/AI` and extended for writes:
 - Missing: unique active-slot constraint, `AuditEvent`, `BookingTransition`, `IdempotencyKey`, `WebhookEvent`, `AgentConversation`/`AgentToolCall`, `Notification`, soft delete on users/services, `updatedAt` on several tables.
 - Enum drift: web uses `booked/approved/in_progress/paid`, the bot uses `pending/confirmed/...`, and payments mix Stripe's own statuses. They'll be unified in §8.
 - No DTO layer. Raw rows (including secrets) are returned everywhere.
-- Multi-tenancy: **not present and not recommended for this scope.** The bot's `WhatsAppService` already acts as a light "business" boundary. I'll add `organizationId` only if you want to show multi-tenancy as a portfolio feature.
+- Multi-tenancy: **not present and not recommended for this scope.** The bot's `WhatsAppService` already acts as a light "business" boundary. I'll add `organizationId` only if you want to show multi-tenancy as a product feature.
 
 ---
 
@@ -160,7 +160,7 @@ Design, copied from ReportReviewAssist `/AI` and extended for writes:
 
 | Component | Plan | Free? |
 |---|---|---|
-| Hosting | **Amplify Hosting** (SSR) | ✅ Legacy free tier: 1,000 build-min, 15 GB out, 500k SSR requests/mo for 12 months. A tiny portfolio app usually stays at or near $0 afterwards too. |
+| Hosting | **Amplify Hosting** (SSR) | ✅ Legacy free tier: 1,000 build-min, 15 GB out, 500k SSR requests/mo for 12 months. A low-traffic app usually stays at or near $0 afterwards too. |
 | Files | **S3**, private bucket, presigned URLs | ✅ 5 GB on the free tier; cents afterwards |
 | Postgres | **RDS db.t4g.micro** | ⚠️ **Free for 12 months only** (legacy accounts), then roughly $12–15/mo **plus about $3.60/mo for its public IPv4**. AWS accounts created after 15 Jul 2025 get credits (up to $200 / 6 months) instead of the 12-month tier. |
 | Postgres alternative | **Neon** free tier (serverless Postgres, 0.5 GB) | ✅ Free indefinitely. Not AWS, but Prisma doesn't care, and switching back to RDS later is just a different `DATABASE_URL`. |
@@ -169,8 +169,8 @@ Design, copied from ReportReviewAssist `/AI` and extended for writes:
 | WhatsApp | **Twilio** (current) | ⚠️ Sandbox works on trial credit, but every message costs after that |
 | WhatsApp alternative | **Meta WhatsApp Cloud API** direct | ✅ Replies inside the customer-initiated service window are free, which is exactly a booking bot's pattern. Free test number. |
 | Email | Keep **SMTP** (Gmail app password) | ✅ SES is optional |
-| Payments | **Stripe test mode** | ✅ Always free. Never goes live for a portfolio. |
-| Auth | Own auth (jose + bcrypt) | ✅ Cognito's free tier also works, but adds complexity for no portfolio value |
+| Payments | **Stripe test mode** | ✅ Always free. Stays in test mode until the business goes live. |
+| Auth | Own auth (jose + bcrypt) | ✅ Cognito's free tier also works, but adds complexity without benefit at this stage |
 | Logs | CloudWatch (Amplify SSR logs) | ✅ 5 GB free |
 | **Guardrail** | **AWS Budgets alert at $1** | ✅ Free. Strongly recommended before creating anything. |
 

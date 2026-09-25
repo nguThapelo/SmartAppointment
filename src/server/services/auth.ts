@@ -137,7 +137,7 @@ export async function requestPasswordReset(input: z.infer<typeof forgotPasswordS
   const link = `${env().APP_URL}/reset-password?token=${encodeURIComponent(token)}`;
   await sendEmail({
     to: user.email,
-    subject: "Reset your SmartAppointment password",
+    subject: "Reset your Appointment Hub password",
     text: `Hi ${user.firstName},\n\nUse this link to reset your password (valid for 30 minutes):\n${link}\n\nIf you didn't ask for this, ignore this email.`,
     html: `<p>Hi ${escapeHtml(user.firstName)},</p><p><a href="${escapeHtml(link)}">Reset your password</a> (valid for 30 minutes).</p><p>If you didn't ask for this, ignore this email.</p>`,
   });

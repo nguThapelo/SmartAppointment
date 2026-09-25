@@ -47,7 +47,7 @@ export async function insertBooking(opts: {
 }) {
   return prisma.booking.create({
     data: {
-      reference: `SA-${randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase()}`,
+      reference: `AH-${randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase()}`,
       channel: "WEB",
       status: opts.status ?? "PENDING",
       providerId: opts.providerId,

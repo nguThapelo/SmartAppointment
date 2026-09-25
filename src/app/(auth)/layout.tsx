@@ -5,10 +5,10 @@ import { Logo } from "@/components/brand";
 // Split screen: brand story on the left (desktop), frosted-glass form card on
 // a glowing gradient backdrop (peach-payment AuthShell style).
 const POINTS = [
-  { icon: CalendarCheck2, text: "Real-time availability — no double bookings, ever" },
-  { icon: MessageCircle, text: "Customers can book on WhatsApp too" },
-  { icon: Sparkles, text: "An AI assistant that asks before it acts" },
-  { icon: ShieldCheck, text: "Secure by design, with a full audit trail" },
+  { icon: CalendarCheck2, text: "Real-time availability — never double-booked" },
+  { icon: MessageCircle, text: "Book, move or cancel right from WhatsApp" },
+  { icon: Sparkles, text: "A smart assistant that books for you" },
+  { icon: ShieldCheck, text: "Secure online payments" },
 ];
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
@@ -24,7 +24,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <h2 className="text-4xl font-bold leading-tight tracking-tight">
             Appointments that <span className="bg-gradient-to-r from-brand-300 to-cyan-300 bg-clip-text text-transparent">book themselves</span>.
           </h2>
-          <p className="mt-4 text-white/65">One calendar for the web, WhatsApp and an AI assistant — with every rule enforced on the server.</p>
+          <p className="mt-4 text-white/65">Bookings, payments and client messages — all in one place, on any device.</p>
           <ul className="mt-8 space-y-4">
             {POINTS.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-3 text-sm text-white/85">
@@ -34,7 +34,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             ))}
           </ul>
         </div>
-        <p className="relative text-xs text-white/40">A portfolio project · Payments run in Stripe test mode</p>
+        <p className="relative text-xs text-white/40">© {new Date().getFullYear()} Appointment Hub</p>
       </section>
 
       {/* Form side */}

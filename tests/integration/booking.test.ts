@@ -36,7 +36,7 @@ describe("creating bookings", () => {
     const res = await book(client.token, { providerServiceId: ps.id, startsAt: slot.startsAt, notes: "First visit" });
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({ status: "PENDING", priceCents: 25000, currency: "ZAR", serviceName: "Haircut" });
-    expect(res.body.reference).toMatch(/^SA-[0-9A-Z]{6}$/);
+    expect(res.body.reference).toMatch(/^AH-[0-9A-Z]{6}$/);
 
     const row = await prisma.booking.findUniqueOrThrow({ where: { id: res.body.id } });
     expect(row.clientId).toBe(client.user.id);

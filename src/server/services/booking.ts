@@ -26,7 +26,7 @@ const PEOPLE = {
 
 const REF_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"; // no 0/O, 1/I/L
 const newReference = () =>
-  `SA-${Array.from({ length: 6 }, () => REF_ALPHABET[randomInt(REF_ALPHABET.length)]).join("")}`;
+  `AH-${Array.from({ length: 6 }, () => REF_ALPHABET[randomInt(REF_ALPHABET.length)]).join("")}`;
 
 // ── Visibility ──────────────────────────────────────────────────────────────
 
@@ -52,7 +52,7 @@ export function partyFor(
 }
 
 const byIdOrReference = (idOrRef: string): Prisma.BookingWhereInput =>
-  /^SA-/i.test(idOrRef) ? { reference: idOrRef.toUpperCase() } : { id: idOrRef };
+  /^[A-Z]{2}-[0-9A-Z]{6}$/i.test(idOrRef) ? { reference: idOrRef.toUpperCase() } : { id: idOrRef };
 
 /** Load a booking the actor may see, with their relationship to it; 404 otherwise. */
 export async function loadVisible(actor: ServiceActor, idOrRef: string, db: Tx | typeof prisma = prisma) {

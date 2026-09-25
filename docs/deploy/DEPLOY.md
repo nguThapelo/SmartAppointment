@@ -1,4 +1,4 @@
-# Deploying SmartAppointment to AWS (free tier)
+# Deploying Appointment Hub to AWS (free tier)
 
 A checklist, in order. Budget about 1–2 hours the first time. Everything here is free
 (AWS free tier/credits, Neon free plan, Stripe test mode, Meta test number, Gemini free tier).
@@ -32,7 +32,7 @@ because each page makes several database queries.
 
 ## 1. Database — Neon (free)
 
-1. Sign up at **neon.tech** → *New project* → name `smartappointment`, Postgres **16**, region **AWS Europe Central 1 (Frankfurt)**.
+1. Sign up at **neon.tech** → *New project* → name `appointment-hub`, Postgres **16**, region **AWS Europe Central 1 (Frankfurt)**.
 2. *Dashboard* → *Connection details* → copy **two** strings:
    - **Pooled** (host contains `-pooler`) → becomes `DATABASE_URL`, add the parameters shown:
      ```
@@ -59,7 +59,7 @@ because each page makes several database queries.
 
 ## 2. File storage — S3
 
-1. S3 console (region **eu-central-1**) → *Create bucket* → e.g. `smartappointment-files-<something-unique>`.
+1. S3 console (region **eu-central-1**) → *Create bucket* → e.g. `appointmenthub-files-<something-unique>`.
    Keep **Block all public access = ON**, encryption = SSE-S3 (default).
 2. Bucket → *Permissions* → *CORS* → paste (you'll add the Amplify URL after step 4):
    ```json
@@ -93,11 +93,11 @@ because each page makes several database queries.
      "Statement": [{
        "Effect": "Allow",
        "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
-       "Resource": "arn:aws:s3:::smartappointment-files-XXXX/bookings/*"
+       "Resource": "arn:aws:s3:::appointmenthub-files-XXXX/bookings/*"
      }]
    }
    ```
-3. Name it `SmartAppointmentComputeRole`. You'll attach it in step 4.
+3. Name it `AppointmentHubComputeRole`. You'll attach it in step 4.
 
 ---
 
@@ -129,7 +129,7 @@ because each page makes several database queries.
 
    ⚠️ Do **not** set any `AWS_*` variables — Amplify reserves that prefix and the build fails. S3 access comes from the role.
 4. *Save and deploy*. First build takes ~5 minutes.
-5. App settings → **IAM roles** → *Compute role* → choose `SmartAppointmentComputeRole` → save.
+5. App settings → **IAM roles** → *Compute role* → choose `AppointmentHubComputeRole` → save.
 6. **If the build fails on the Next.js version** (Amplify's supported Next.js range can lag new releases):
    tell me the error — the fallback is pinning Next.js 15, a small, tested change.
 
@@ -183,7 +183,7 @@ because each page makes several database queries.
    - Callback URL: `https://<your-app-url>/api/webhooks/whatsapp`
    - Verify token: the same random string → *Verify and save*
    - *Webhook fields* → subscribe to **messages**.
-7. In SmartAppointment as admin → **WhatsApp → Channels → Add channel**: pick provider *Thandi Nkosi*,
+7. In Appointment Hub as admin → **WhatsApp → Channels → Add channel**: pick provider *Thandi Nkosi*,
    paste the **Phone number ID**, display number, a welcome message. Turn off the placeholder "Thandi's Salon" channel.
 8. Test: from your verified phone, send **hi** to the test number → the booking menu replies.
 
@@ -195,7 +195,7 @@ Password-reset links and booking notifications. Without SMTP the app works; emai
 
 1. Google account → *Security* → turn on 2-Step Verification → *App passwords* → create one.
 2. `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_USER=<your gmail>`, `SMTP_PASS=<app password>`,
-   `SMTP_FROM=SmartAppointment <your gmail>` → redeploy.
+   `SMTP_FROM=Appointment Hub <your gmail>` → redeploy.
 
 ---
 
@@ -215,8 +215,8 @@ Test once: *Actions* → *Scheduled jobs* → *Run workflow* → pick `cleanup`.
 
 ```bash
 BASE=https://<your-app-url> \
-SMOKE_CLIENT_EMAIL=demo.client@smartappointment.local SMOKE_CLIENT_PASSWORD='<SEED_DEMO_PASSWORD>' \
-SMOKE_PROVIDER_EMAIL=demo.provider@smartappointment.local SMOKE_PROVIDER_PASSWORD='<SEED_DEMO_PASSWORD>' \
+SMOKE_CLIENT_EMAIL=lerato.mokoena@example.com SMOKE_CLIENT_PASSWORD='<SEED_DEMO_PASSWORD>' \
+SMOKE_PROVIDER_EMAIL=thandi.nkosi@example.com SMOKE_PROVIDER_PASSWORD='<SEED_DEMO_PASSWORD>' \
 npm run smoke
 ```
 
@@ -239,7 +239,7 @@ the AI assistant, and a WhatsApp booking.
 
 ## What costs money (and how to avoid it)
 
-- **Amplify Hosting:** free tier (or new-account credits). A portfolio's traffic stays within it; the Zero-spend budget warns you otherwise.
+- **Amplify Hosting:** free tier (or new-account credits). Low traffic stays within it; the Zero-spend budget warns you otherwise.
 - **S3:** a few MB of uploads — effectively $0.
 - **Neon:** free plan (0.5 GB). No card needed.
 - **Stripe / Meta test number / Gemini:** free in test/free modes. **Never** put live Stripe keys in (the app refuses them anyway).

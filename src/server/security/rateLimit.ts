@@ -6,7 +6,7 @@ import { tooManyRequests } from "@/server/errors";
 // peach-payment keeps buckets in process memory, which is right for one long-
 // lived Node server. Amplify runs Next.js on many short-lived Lambda instances,
 // so an in-memory counter would reset constantly and never limit anything.
-// A single atomic upsert per check is cheap at portfolio traffic levels.
+// A single atomic upsert per check is cheap at this application's traffic levels.
 
 export interface RateLimitRule {
   limit: number;

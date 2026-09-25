@@ -10,8 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smartappointment
-      DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/smartappointment
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/appointmenthub
+      DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/appointmenthub
       SESSION_SECRET: ci-only-session-secret-not-used-anywhere-else
       APP_URL: http://localhost:3000
 
@@ -21,7 +21,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: smartappointment
+          POSTGRES_DB: appointmenthub
         ports:
           - 5432:5432
         options: >-

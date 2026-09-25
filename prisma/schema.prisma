@@ -1,4 +1,4 @@
-// SmartAppointment data model. Design notes: docs/design/PHASE-2-DESIGN.md §4.
+// Appointment Hub data model. Design notes: docs/design/PHASE-2-DESIGN.md §4.
 // Constraints Prisma can't express (exclusion constraint, CHECKs, partial
 // unique indexes) are added in raw SQL at the end of the init migration.
 
@@ -236,7 +236,7 @@ model AvailabilityOverride {
 
 model Booking {
   id                String           @id @default(cuid())
-  reference         String           @unique // e.g. SA-7K3P9Q — random, never sequential
+  reference         String           @unique // e.g. AH-7K3P9Q — random, never sequential
   channel           BookingChannel
   status            BookingStatus    @default(PENDING)
   providerId        String
@@ -303,7 +303,7 @@ model BookingMessage {
   @@index([bookingId, createdAt])
 }
 
-// ── Payments (Stripe test mode, Checkout) ───────────────────────────────────
+// ── Payments (Stripe Checkout) ───────────────────────────────────
 
 model Payment {
   id                    String         @id @default(cuid())

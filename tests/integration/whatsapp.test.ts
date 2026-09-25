@@ -122,7 +122,7 @@ describe("WhatsApp booking conversation", () => {
     const menu = await say(channel.phoneNumberId, "27821110001", "hi");
     expect(menu).toContain("Welcome to Test Salon!");
     const confirmation = await bookThrough(channel.phoneNumberId, "27821110001");
-    expect(confirmation).toMatch(/You're booked! Your reference is \*SA-[0-9A-Z]{6}\*/);
+    expect(confirmation).toMatch(/You're booked! Your reference is \*AH-[0-9A-Z]{6}\*/);
 
     const booking = await prisma.booking.findFirstOrThrow({ where: { whatsappChannelId: channel.id } });
     expect(booking).toMatchObject({

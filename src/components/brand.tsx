@@ -12,13 +12,11 @@ export function LogoMark({ className }: { className?: string }) {
 
 export function Logo({ href = "/", tone = "dark" }: { href?: string; tone?: "dark" | "light" }) {
   return (
-    <Link href={href} className="inline-flex items-center gap-2.5" aria-label="SmartAppointment home">
+    <Link href={href} className="inline-flex items-center gap-2.5" aria-label="Appointment Hub home">
       <LogoMark />
-      <span className="leading-none">
-        <span className={cx("block text-[10px] font-bold uppercase tracking-[0.2em]", tone === "light" ? "text-brand-300" : "text-brand-600")}>Smart</span>
-        <span className={cx("block font-[family-name:var(--font-display)] text-[17px] font-bold tracking-tight", tone === "light" ? "text-white" : "text-ink-900")}>
-          Appointment
-        </span>
+      <span className={cx("font-[family-name:var(--font-display)] text-[18px] font-bold tracking-tight", tone === "light" ? "text-white" : "text-ink-900")}>
+        Appointment
+        <span className={cx("ml-1 bg-clip-text text-transparent", tone === "light" ? "bg-gradient-to-r from-brand-300 to-cyan-300" : "bg-brand-gradient")}>Hub</span>
       </span>
     </Link>
   );

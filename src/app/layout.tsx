@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "SmartAppointment", template: "%s · SmartAppointment" },
+  title: { default: "Appointment Hub", template: "%s · Appointment Hub" },
   description: "Book, manage and get paid for appointments — on the web, on WhatsApp, or by asking the AI assistant.",
 };
 

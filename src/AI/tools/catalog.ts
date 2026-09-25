@@ -20,7 +20,7 @@ import { HELP_TOPICS } from "../prompts/help";
 // Rules every tool follows:
 //   - The actor comes from the session, passed in by the executor. No tool
 //     takes a user id, role, status or amount from the model.
-//   - Bookings are referred to by their public reference (SA-XXXXXX); access
+//   - Bookings are referred to by their public reference (AH-XXXXXX); access
 //     is decided by the booking service exactly as for the web UI.
 //   - Results are minimal DTOs: no internal ids, emails, phone numbers,
 //     notes or feedback text (untrusted free text is prompt-injection bait).
@@ -43,7 +43,7 @@ export interface ToolDef<S extends ZodTypeAny = ZodTypeAny> {
 
 const define = <S extends ZodTypeAny>(t: ToolDef<S>) => t;
 
-const reference = z.string().regex(/^SA-[0-9A-Z]{6}$/i).describe("Booking reference, e.g. SA-7K3P9Q");
+const reference = z.string().regex(/^[A-Z]{2}-[0-9A-Z]{6}$/i).describe("Booking reference, e.g. AH-7K3P9Q");
 const isoTime = z.string().datetime({ offset: true }).describe("Slot start time exactly as returned by getAvailability (ISO 8601)");
 const ALL: Role[] = ["CLIENT", "PROVIDER", "ADMIN"];
 
@@ -227,7 +227,7 @@ const auditTool = define({
 
 const helpTool = define({
   name: "getPlatformHelp",
-  description: "How-to help for SmartAppointment features.",
+  description: "How-to help for Appointment Hub features.",
   kind: "read",
   roles: ALL,
   input: z.object({ topic: z.enum(Object.keys(HELP_TOPICS) as [string, ...string[]]) }).strict(),

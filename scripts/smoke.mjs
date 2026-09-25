@@ -1,8 +1,8 @@
 // End-to-end smoke test against a running deployment. Never prints secrets.
 //
 //   BASE=https://main.xxxxx.amplifyapp.com \
-//   SMOKE_CLIENT_EMAIL=demo.client@smartappointment.local SMOKE_CLIENT_PASSWORD=... \
-//   SMOKE_PROVIDER_EMAIL=demo.provider@smartappointment.local SMOKE_PROVIDER_PASSWORD=... \
+//   SMOKE_CLIENT_EMAIL=lerato.mokoena@example.com SMOKE_CLIENT_PASSWORD=... \
+//   SMOKE_PROVIDER_EMAIL=thandi.nkosi@example.com SMOKE_PROVIDER_PASSWORD=... \
 //   npm run smoke
 //
 // Books a real slot as the client, approves it as the provider, then cancels
@@ -44,7 +44,7 @@ const health = await fetch(`${B}/api/health`).then((r) => r.json()).catch(() => 
 check("health endpoint reports the database is reachable", health.database === "ok");
 
 const landing = await fetch(B).then((r) => r.text());
-check("landing page renders", landing.includes("SmartAppointment"));
+check("landing page renders", landing.includes("Appointment Hub"));
 
 const protectedPage = await fetch(`${B}/dashboard`, { redirect: "manual" });
 check("dashboard requires sign-in", [302, 303, 307, 308].includes(protectedPage.status));

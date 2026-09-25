@@ -3,7 +3,7 @@
 
 export const HELP_TOPICS = {
   booking:
-    "Clients pick a service, a provider and a free time slot, then confirm. New bookings are PENDING until the provider approves them (WhatsApp channels may auto-approve). Each booking gets a reference like SA-7K3P9Q.",
+    "Clients pick a service, a provider and a free time slot, then confirm. New bookings are PENDING until the provider approves them (WhatsApp channels may auto-approve). Each booking gets a reference like AH-7K3P9Q.",
   payments:
     "For online-paid services the provider requests payment after approving; the client gets a secure Stripe payment link. The booking becomes PAID only when Stripe confirms the payment. On-site services are paid in person. Refunds are handled by the business directly.",
   cancellations:

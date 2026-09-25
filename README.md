@@ -1,76 +1,105 @@
-# SmartAppointment
+# Appointment Hub
 
-SmartAppointment is an appointment and service management platform for three user groups: administrators, service providers, and clients.
+Appointment booking and service management for clients, service providers and administrators —
+on the web, over WhatsApp, and through an AI assistant, all backed by one set of business rules.
 
-## What the application does
+**Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Prisma · PostgreSQL · Tailwind CSS v4 ·
+Stripe Checkout · Meta WhatsApp Cloud API · Google Gemini · AWS Amplify · Amazon S3 · Vitest
 
-- Manages accounts for clients and service providers
-- Supports role-based access and role-based dashboards
-- Allows clients to book services with providers
-- Lets providers review and approve or decline bookings
-- Tracks full booking lifecycle from booked to approved, paid, and completed
-- Supports dynamic service categories and sub-services
-- Supports dynamic reusable dropdown/reference values managed by admin
-- Supports payment method setup and payment tracking
-- Supports provider earnings and client spending summaries
-- Supports feedback question management and response submission
+---
 
-## Roles and responsibilities
+## Features
 
-### Admin
+**Clients**
+- Browse services, compare providers and book a genuinely free time slot
+- Reschedule or cancel, pay online via Stripe, message the provider, leave feedback
+- Book, view, move and cancel appointments over WhatsApp
 
-- Full visibility across users, bookings, payments, and feedback
-- CRUD for users
-- CRUD for service categories and sub-services
-- CRUD for reusable master data values used in forms and dropdowns
-- CRUD for global feedback question sets and questions
+**Providers**
+- Approve or decline requests, reschedule, mark appointments complete or no-show
+- Manage services, prices, weekly hours and holiday exceptions
+- Request payment with one click; track earnings; reply to WhatsApp customers
 
-### Provider
+**Administrators**
+- Platform metrics, user and role management, service catalogue
+- Feedback question sets, WhatsApp channels, audit log and assistant activity
 
-- Manages own pricing entries per service
-- Reviews and decides booking requests
-- Initiates payment for booked services
-- Monitors payment status and earnings
-- Manages provider-specific feedback questions
+**AI assistant** (every role)
+- Answers questions and performs tasks through a fixed set of role-scoped tools
+- Any change it proposes is shown as a confirmation card and only runs when the user confirms
 
-### Client
+## Architecture
 
-- Books appointments by category and sub-service
-- Manages own payment methods
-- Views spending summaries
-- Submits feedback after completed services
+```
+Browser ─┐                        ┌──────────────── Next.js route handlers (thin) ────────────────┐
+WhatsApp ─┼──▶ AWS Amplify (SSR) ──▶ auth · rate limit · CSRF · strict validation · error envelope │
+AI chat ─┘                        └───────────────────────────────┬───────────────────────────────┘
+                                                                   ▼
+                                  Services: booking · availability · pricing · payment · feedback
+                                  booking state machine · payment state funnel · audit log
+                                                                   ▼
+                                  Prisma ──▶ PostgreSQL        S3 (presigned URLs)
+Stripe ──webhook──▶ /api/webhooks/stripe      Meta ──webhook──▶ /api/webhooks/whatsapp
+```
 
-## Data model summary
+- **One service layer.** The web UI, the WhatsApp bot and the AI assistant all call the same services,
+  so permissions, prices, availability and booking states are enforced identically everywhere.
+- **Explicit state machines.** Booking status changes go through a single transition table; payment status
+  through a single funnel that ignores late or out-of-order provider events.
+- **Database-level integrity.** An exclusion constraint makes overlapping bookings impossible, even under
+  concurrent requests; money is stored in integer cents and snapshotted at booking time.
+- **AI module** (`src/AI`). Provider-agnostic (Gemini by default, Anthropic optional), with role-filtered tools,
+  strict argument validation and a confirm-before-write protocol. See [`src/AI/README.md`](src/AI/README.md).
 
-- User profiles and roles
-- Service categories and sub-services
-- Provider pricing records
-- Appointments with lifecycle and payment fields
-- Payment customers, payment methods, and payment transactions
-- Feedback question sets, questions, responses, and response items
-- Master data types and items for dynamic reusable form values
+## Security highlights
 
-## Current business flow
+- Sessions in httpOnly cookies; roles re-read from the database on every request; instant revocation
+- Strict input schemas reject unexpected fields; server-computed prices; ownership checks on every read and write
+- Signed and de-duplicated Stripe and WhatsApp webhooks; idempotency keys on booking, payment and feedback
+- Postgres-backed rate limiting; origin checks for CSRF; structured logs with automatic redaction
+- Append-only audit trail for bookings, payments, role changes and assistant actions
 
-1. Client selects service category and sub-service
-2. Client creates booking request
-3. Provider approves or declines
-4. Provider initiates payment
-5. Payment status is synchronized and booking moves to paid
-6. Provider marks service as completed
-7. Client submits feedback
+## Getting started
 
-## Notes
+Requirements: Node.js 20.18+, Docker (for a local Postgres).
 
-- Most forms and dashboards depend on active authentication.
-- If requests return unauthorized, sign out and sign back in to refresh role claims and access token.
-- Admin-only operations require an account with admin role metadata.
-- Development mode allows self-signed certificates by default to reduce local TLS issues.
-- To enforce strict TLS locally, set `ALLOW_SELF_SIGNED_TLS=false`.
+```bash
+docker run -d --name appointmenthub-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=appointmenthub -p 5432:5432 postgres:16-alpine
+cp .env.example .env          # fill in DATABASE_URL, DIRECT_DATABASE_URL, SESSION_SECRET, SEED_* …
+npm install
+npx prisma migrate dev
+npm run db:seed               # admin account (+ demo data when SEED_DEMO=true)
+npm run dev
+```
 
+Stripe, WhatsApp, Gemini, S3 and SMTP are optional locally — each feature switches off gracefully when its
+keys are absent. See [`.env.example`](.env.example) for every setting.
 
+## Scripts
 
-## to expand the app
-- when they book an appointment for a certain service, 
-they must fill a membership form for that service, like if it is a doctor's appointment the membership form must have all needed details, medical hsitory, personal details, addresses, medical aid,  (different membershipt for per service), like in a salon you'd have a allergies, previous illenesses, diet, so forth. us AI agent to suggest solutions for these appointments, like a dietecian would give you tips based on the info you added on the membership form, also add insurance, all types as a service
+| Command | What it does |
+|---|---|
+| `npm run dev` | Development server |
+| `npm test` | Unit + integration tests against a real Postgres (`<db>_test`) |
+| `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
+| `npm run build` | Production build |
+| `npm run db:migrate` · `db:deploy` · `db:seed` | Prisma migrations and seed data |
+| `npm run smoke` | End-to-end checks against a running deployment (`BASE=…`) |
 
+## Testing
+
+600+ tests run against a real PostgreSQL database — no database mocks. They cover the booking state machine
+exhaustively, access control (including cross-user and cross-provider attempts), concurrency and double-booking,
+webhook forgery and replay, idempotency, and the AI assistant's behaviour under prompt injection and tool misuse.
+
+## Deployment
+
+AWS Amplify Hosting (Next.js SSR) with PostgreSQL on Neon, file storage on S3, and scheduled jobs from GitHub
+Actions. Step-by-step instructions: [`docs/deploy/DEPLOY.md`](docs/deploy/DEPLOY.md).
+
+## Project documentation
+
+- [Architecture & security review](docs/audit/PHASE-1-AUDIT.md)
+- [System design](docs/design/PHASE-2-DESIGN.md)
+- [Implementation summary](docs/PHASE-3-SUMMARY.md)
+- [Deployment guide](docs/deploy/DEPLOY.md)

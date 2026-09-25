@@ -30,7 +30,7 @@ interface TurnResult {
   pendingActions: PendingAction[];
 }
 
-const STORAGE_KEY = "sa.assistant.conversation";
+const STORAGE_KEY = "ah.assistant.conversation";
 const SUGGESTIONS = ["What bookings do I have coming up?", "Find me a haircut this week", "How do payments work?"];
 
 function readStored(): string | null {

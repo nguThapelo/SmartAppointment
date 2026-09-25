@@ -30,7 +30,7 @@ function write(level: "info" | "warn" | "error" | "metric", msg: string, ctx?: C
   const line = JSON.stringify({
     ts: new Date().toISOString(),
     level,
-    service: "smart-appointment",
+    service: "appointment-hub",
     msg,
     ...(redact(ctx ?? {}) as Ctx),
   });

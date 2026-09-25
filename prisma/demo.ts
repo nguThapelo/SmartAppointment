@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { addDays, formatISO } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 
-// Demo data for the portfolio deployment: a small catalogue, two providers
+// Demo data for showcase / staging environments: a small catalogue, two providers
 // with hours and prices, a client with bookings in several states, feedback
 // questions and a WhatsApp channel. Idempotent — re-running changes nothing
 // that already exists. Enabled with SEED_DEMO=true; the demo accounts'
@@ -69,9 +69,9 @@ export async function seedDemo(prisma: PrismaClient) {
       create: { email, firstName, lastName, role, phone, passwordHash },
       update: {},
     });
-  const thandi = await person("demo.provider@smartappointment.local", "Thandi", "Nkosi", "PROVIDER", "+27821000001");
-  const sipho = await person("demo.provider2@smartappointment.local", "Sipho", "Dube", "PROVIDER", "+27821000002");
-  const lerato = await person("demo.client@smartappointment.local", "Lerato", "Mokoena", "CLIENT", "+27821000003");
+  const thandi = await person("thandi.nkosi@example.com", "Thandi", "Nkosi", "PROVIDER", "+27821000001");
+  const sipho = await person("sipho.dube@example.com", "Sipho", "Dube", "PROVIDER", "+27821000002");
+  const lerato = await person("lerato.mokoena@example.com", "Lerato", "Mokoena", "CLIENT", "+27821000003");
 
   // ── Prices & hours ────────────────────────────────────────────────────────
   const offer = async (providerId: string, sub: string, rateCents: number, durationMin: number, paymentMode: "ONLINE" | "ON_SITE" = "ONLINE") =>
@@ -150,9 +150,9 @@ export async function seedDemo(prisma: PrismaClient) {
       }
       return b;
     };
-    await make("SA-DEMO01", haircut, "Haircut", at(5, "10:00"), "PENDING");
-    await make("SA-DEMO02", massage, "Massage", at(8, "14:00"), "APPROVED");
-    await make("SA-DEMO03", manicure, "Manicure", at(-6, "11:00"), "COMPLETED");
+    await make("AH-DEMO01", haircut, "Haircut", at(5, "10:00"), "PENDING");
+    await make("AH-DEMO02", massage, "Massage", at(8, "14:00"), "APPROVED");
+    await make("AH-DEMO03", manicure, "Manicure", at(-6, "11:00"), "COMPLETED");
   }
 
   // ── WhatsApp channel for Thandi ───────────────────────────────────────────
@@ -186,5 +186,5 @@ export async function seedDemo(prisma: PrismaClient) {
     });
   }
 
-  console.log("Demo data ready: demo.client@ / demo.provider@ / demo.provider2@smartappointment.local");
+  console.log("Demo data ready: lerato.mokoena@ / thandi.nkosi@ / sipho.dube@example.com");
 }

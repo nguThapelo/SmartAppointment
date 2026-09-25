@@ -6,7 +6,7 @@ import { jwtVerify } from "jose";
 // pages. It is NOT the security boundary — every API route and server page
 // re-resolves the user and role from the database (src/server/auth).
 
-const SESSION_COOKIE = "sa_session";
+const SESSION_COOKIE = "ah_session";
 const PROTECTED_PREFIXES = [
   "/dashboard", "/book", "/bookings", "/provider", "/admin", "/inbox", "/feedback", "/earnings", "/assistant", "/account",
 ];

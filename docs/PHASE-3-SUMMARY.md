@@ -64,7 +64,7 @@ A scripted model plays a compromised assistant. The code, not the prompt, stops 
 ## Deliberate deviations from the original prompt
 
 - **Payments:** Stripe Checkout links instead of stored cards + off-session charges (no card data stored at all).
-- **No Cognito, Bedrock, SQS, Secrets Manager, WAF, custom domain:** out of scope for a $0 portfolio deployment (Phase 1 §7).
+- **No Cognito, Bedrock, SQS, Secrets Manager, WAF, custom domain:** out of scope for the $0 free-tier deployment (Phase 1 §7).
 - **No multi-tenancy:** documented migration path in the design (§4.4).
 - **Refunds:** manual in the Stripe dashboard; payments that land on cancelled bookings are flagged `needs_refund`.
 

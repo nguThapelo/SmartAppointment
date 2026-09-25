@@ -174,7 +174,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
           <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-ink-200/60 bg-white/70 px-4 backdrop-blur-xl backdrop-saturate-150 sm:px-6 lg:px-8">
             <IconButton label="Open menu" className="lg:hidden" onClick={() => setMenuOpen(true)} icon={<Menu className="size-5" />} />
             <div className="min-w-0 flex-1">
-              <p className="truncate font-[family-name:var(--font-display)] text-[15px] font-semibold text-ink-900">{current?.label ?? "SmartAppointment"}</p>
+              <p className="truncate font-[family-name:var(--font-display)] text-[15px] font-semibold text-ink-900">{current?.label ?? "Appointment Hub"}</p>
             </div>
             <div className="relative">
               <button

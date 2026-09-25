@@ -75,8 +75,9 @@ export function PaymentPanel({ booking, isCustomer }: { booking: BookingDTO; isC
             <CreditCard className="size-4" /> Pay {money(p.amountCents, p.currency)} securely
           </a>
         )}
-        {isCustomer && p?.status === "PENDING" && (
-          <p className="text-xs text-ink-500">Stripe test mode — use card 4242 4242 4242 4242, any future date and CVC.</p>
+        {/* Only for Stripe test-mode checkouts; never shown for live payments. */}
+        {isCustomer && p?.status === "PENDING" && p.checkoutUrl?.includes("cs_test_") && (
+          <p className="text-xs text-ink-500">Test payments: use card 4242 4242 4242 4242 with any future date and CVC.</p>
         )}
         {canRequest && (
           <Button onClick={() => request.mutate()} loading={request.isPending} className="w-full" icon={<CreditCard className="size-4" />}>

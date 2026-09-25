@@ -7,7 +7,7 @@ import { SignJWT, jwtVerify } from "jose";
 // access (audit C-1). `sv` is the user's sessionVersion; bumping it in the DB
 // revokes every outstanding token for that user.
 
-export const SESSION_COOKIE = "sa_session";
+export const SESSION_COOKIE = "ah_session";
 export const SESSION_TTL_SECONDS = 60 * 60 * 8;
 
 export interface SessionClaims {

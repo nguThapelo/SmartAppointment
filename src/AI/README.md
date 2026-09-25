@@ -1,4 +1,4 @@
-# /AI — SmartAppointment assistant
+# /AI — Appointment Hub assistant
 
 Everything the assistant needs — model providers, prompts, tools, guardrails and
 the turn loop — lives in this folder, following the structure of the

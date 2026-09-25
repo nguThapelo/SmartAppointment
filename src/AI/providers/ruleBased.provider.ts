@@ -10,7 +10,7 @@ function reply(message: string): string {
     return "You can see real-time availability by choosing a service, then a provider, then a date on the Book page.";
   }
   if (/(book|appointment|reserve)/.test(m)) {
-    return "To book: pick a service → provider → date and time on the Book page, then confirm. You'll get a reference like SA-ABC123.";
+    return "To book: pick a service → provider → date and time on the Book page, then confirm. You'll get a reference like AH-ABC123.";
   }
   if (/(pay|payment|invoice)/.test(m)) {
     return "When your provider requests payment you'll see a Pay button on the booking. Payment status updates automatically once Stripe confirms it.";

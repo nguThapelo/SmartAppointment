@@ -73,7 +73,7 @@ describe("database integrity constraints", () => {
     const booking = (startsAt: string, endsAt: string, status: "PENDING" | "CANCELLED" = "PENDING") =>
       prisma.booking.create({
         data: {
-          reference: `SA-${randomUUID().slice(0, 8)}`, channel: "WEB", status,
+          reference: `AH-${randomUUID().slice(0, 8)}`, channel: "WEB", status,
           providerId: provider.id, clientId: client.id, providerServiceId: ps.id,
           serviceName: "Haircut", startsAt: new Date(startsAt), endsAt: new Date(endsAt),
           priceCents: 25000, currency: "ZAR", paymentMode: "ONLINE",
