@@ -35,3 +35,8 @@ Thumbs.db
 /public/images/
 /public/next.svg
 /public/vercel.svg
+
+# AI assistant / editor instruction files (local only, never published)
+CLAUDE.md
+AGENTS.md
+.claude/
