@@ -2,7 +2,7 @@ import nodemailer, { type Transporter } from "nodemailer";
 import { env, isConfigured } from "@/server/env";
 import { log } from "@/server/log";
 
-// Outbound email over SMTP (free with a Gmail app password). When SMTP isn't
+// Outbound email over SMTP (Amazon SES in production). When SMTP isn't
 // configured the message is dropped with a log line — never an error for the
 // caller — so local dev and CI work without credentials.
 

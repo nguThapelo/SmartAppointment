@@ -8,16 +8,23 @@ frontend:
         - npx prisma generate
     build:
       commands:
-        # Applies pending migrations using DIRECT_DATABASE_URL (Neon direct connection).
+        # Applies pending migrations using DIRECT_DATABASE_URL.
         # Migrations are additive-only by policy — see docs/design §11 (rollback).
         - npx prisma migrate deploy
+        # First-run setup without a terminal: when SEED_ADMIN_EMAIL/PASSWORD are set
+        # in the Amplify console, create the admin (and demo data if SEED_DEMO=true).
+        # Idempotent — never duplicates rows or overwrites an existing admin's
+        # password. SEED_* vars are NOT written to .env.production, so they never
+        # reach the running app; remove them from the console after first deploy.
+        - >-
+          if [ -n "$SEED_ADMIN_EMAIL" ] && [ -n "$SEED_ADMIN_PASSWORD" ]; then npx tsx prisma/seed.ts; else echo "Seed skipped (SEED_ADMIN_* not set)"; fi
         # Amplify injects console env vars into the BUILD container only, not the
         # SSR runtime, so the allow-listed ones are written into .env.production
         # for Next.js to bundle into the compute function (briefcase pattern).
         # AWS_* are reserved by Amplify and must NOT be set; S3 access comes from
         # the SSR compute role instead of static keys.
         - >-
-          env | grep -E '^(APP_URL|DATABASE_URL|DIRECT_DATABASE_URL|SESSION_SECRET|CRON_SECRET|S3_BUCKET_NAME|STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET|WHATSAPP_ACCESS_TOKEN|WHATSAPP_APP_SECRET|WHATSAPP_VERIFY_TOKEN|WHATSAPP_GRAPH_VERSION|AI_ENABLED|AI_ACTIVE_PROVIDER|AI_DAILY_USER_LIMIT|AI_DAILY_GLOBAL_LIMIT|AI_GEMINI_MODEL|AI_ANTHROPIC_MODEL|GEMINI_API_KEY|ANTHROPIC_API_KEY|SMTP_HOST|SMTP_PORT|SMTP_USER|SMTP_PASS|SMTP_FROM|GOOGLE_CLIENT_ID|GOOGLE_CLIENT_SECRET|GOOGLE_REFRESH_TOKEN|GOOGLE_CALENDAR_ID)='
+          env | grep -E '^(APP_URL|DATABASE_URL|DIRECT_DATABASE_URL|SESSION_SECRET|CRON_SECRET|S3_BUCKET_NAME|S3_REGION|STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET|WHATSAPP_ACCESS_TOKEN|WHATSAPP_APP_SECRET|WHATSAPP_VERIFY_TOKEN|WHATSAPP_GRAPH_VERSION|AI_ENABLED|AI_ACTIVE_PROVIDER|AI_DAILY_USER_LIMIT|AI_DAILY_GLOBAL_LIMIT|AI_GEMINI_MODEL|AI_ANTHROPIC_MODEL|GEMINI_API_KEY|ANTHROPIC_API_KEY|SMTP_HOST|SMTP_PORT|SMTP_USER|SMTP_PASS|SMTP_FROM|GOOGLE_CLIENT_ID|GOOGLE_CLIENT_SECRET|GOOGLE_REFRESH_TOKEN|GOOGLE_CALENDAR_ID)='
           >> .env.production || true
         - npm run build
   artifacts:

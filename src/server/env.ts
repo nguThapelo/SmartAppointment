@@ -20,7 +20,10 @@ const schema = z.object({
   CRON_SECRET: z.string().min(16).optional(),
 
   S3_BUCKET_NAME: z.string().optional(),
-  AWS_REGION: z.string().default("af-south-1"),
+  // The bucket's region. Amplify reserves the AWS_* prefix, so production sets
+  // S3_REGION; AWS_REGION remains the local-dev / Lambda-runtime fallback.
+  S3_REGION: z.string().optional(),
+  AWS_REGION: z.string().default("eu-central-1"),
 
   STRIPE_SECRET_KEY: z
     .string()

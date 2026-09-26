@@ -1,19 +1,23 @@
 # Deploying Appointment Hub to AWS (free tier)
 
-A checklist, in order. Budget about 1–2 hours the first time. Everything here is free
-(AWS free tier/credits, Neon free plan, Stripe test mode, Meta test number, Gemini free tier).
+A checklist, in order — everything is done in web consoles, no terminal needed.
+Budget about 1–2 hours the first time.
 
 ```
 GitHub (main) ──push──▶ AWS Amplify Hosting (Next.js SSR, eu-central-1)
-                              │           │            │
-                   Neon Postgres     Amazon S3     Stripe · Meta WhatsApp · Gemini
-                  (Frankfurt, Prisma)  (files)        (webhooks → /api/webhooks/*)
-GitHub Actions: CI on every push · hourly/daily jobs → /api/cron/*
+                              │              │            │
+                  Amazon RDS PostgreSQL   Amazon S3    Stripe · Meta WhatsApp · Gemini
+                   (Frankfurt, Prisma)     (files)      (webhooks → /api/webhooks/*)
+EventBridge Scheduler → Lambda: hourly/daily jobs → /api/cron/*  ·  Amazon SES: email
+GitHub Actions: tests on every push
 ```
 
-**Region:** use **Frankfurt everywhere** — AWS `eu-central-1` for Amplify and S3, Neon `aws-eu-central-1`.
-Neon has no African region; keeping the app next to the database matters more than being near users,
-because each page makes several database queries.
+**Region:** use **Frankfurt (`eu-central-1`) for everything** — Amplify, RDS and S3 in one region keeps the app
+fast, because each page makes several database queries.
+
+**Cost:** Amplify, S3, Stripe test mode, the Meta test number and Gemini's free tier cost nothing. **RDS is free for
+12 months** on accounts created before 15 July 2025 (newer accounts use their sign-up credits); after that a
+`db.t4g.micro` is roughly $15–19/month including its public IP. The budget alarm below warns you before any charge.
 
 ---
 
@@ -21,39 +25,32 @@ because each page makes several database queries.
 
 - [ ] **AWS Budgets alarm** (do this first): AWS console → *Billing* → *Budgets* → *Create budget* →
   *Use a template* → **Zero spend budget** → your email. You'll be emailed the moment anything costs money.
-- [ ] Generate two secrets (run twice, keep both):
-  ```bash
-  node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-  ```
-  → one for `SESSION_SECRET`, one for `CRON_SECRET`.
-- [ ] Never commit `.env` (it's git-ignored). Production values live only in the Amplify console.
+- [ ] **Two secrets:** use any password generator (your browser's, Bitwarden, 1Password…) to create **two random
+  strings of 64 letters and digits** → one for `SESSION_SECRET`, one for `CRON_SECRET`.
+- [ ] Production values live only in the Amplify console — never in the repo.
 
 ---
 
-## 1. Database — Neon (free)
+## 1. Database — Amazon RDS for PostgreSQL
 
-1. Sign up at **neon.tech** → *New project* → name `appointment-hub`, Postgres **16**, region **AWS Europe Central 1 (Frankfurt)**.
-2. *Dashboard* → *Connection details* → copy **two** strings:
-   - **Pooled** (host contains `-pooler`) → becomes `DATABASE_URL`, add the parameters shown:
-     ```
-     postgresql://USER:PASSWORD@ep-xxxx-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require&pgbouncer=true&connect_timeout=15
-     ```
-   - **Direct** (no `-pooler`) → becomes `DIRECT_DATABASE_URL`:
-     ```
-     postgresql://USER:PASSWORD@ep-xxxx.eu-central-1.aws.neon.tech/neondb?sslmode=require
-     ```
-3. Create the tables and load the admin + demo data **from your machine** (Git Bash, in the project folder):
-   ```bash
-   export DATABASE_URL='<pooled string>'
-   export DIRECT_DATABASE_URL='<direct string>'
-   export SEED_ADMIN_EMAIL='you@yourdomain.com'
-   export SEED_ADMIN_PASSWORD='<a strong password, 10+ chars>'
-   export SEED_DEMO=true
-   export SEED_DEMO_PASSWORD='<password for the demo accounts>'
-   npx prisma migrate deploy
-   npx tsx prisma/seed.ts
+1. AWS console (region **eu-central-1**) → **RDS** → *Create database* → **Standard create** → **PostgreSQL** (version 16).
+2. *Templates* → **Free tier**.
+3. *DB instance identifier* `appointment-hub` · *Master username* `appadmin` · choose a strong *Master password*.
+4. *Connectivity* → **Public access: Yes** (Amplify doesn't run inside your VPC) · *VPC security group* →
+   *Create new* → `appointment-hub-db`.
+5. *Additional configuration* → *Initial database name* `appointmenthub` → **Create database**
+   (≈5 minutes, until the status is *Available*).
+6. Open the database → *Connectivity & security* → click the security group → *Edit inbound rules* → add
+   **PostgreSQL · port 5432 · source 0.0.0.0/0**. (Amplify has no fixed IP addresses; the strong password and
+   encrypted connections protect the database.)
+7. Copy the **Endpoint** and build your connection string — it's used for *both* database variables in step 4:
    ```
-   You should see *Created admin …* and *Demo data ready*. (Future migrations run automatically on every Amplify build.)
+   postgresql://appadmin:<password>@<endpoint>:5432/appointmenthub?sslmode=require&connection_limit=5
+   ```
+   If the password contains `@`, `#` or `/`, write them as `%40`, `%23`, `%2F`.
+
+The tables, your admin account and the demo data are created **automatically by the first Amplify build**
+(step 4) — there's nothing to run yourself.
 
 ---
 
@@ -103,24 +100,22 @@ because each page makes several database queries.
 
 ## 4. Hosting — AWS Amplify
 
-1. **Get the code onto `main`** (the new app lives on the `rebuild` branch):
-   ```bash
-   git switch main
-   git merge --ff-only rebuild
-   git push origin main
-   ```
+1. Make sure the latest code is on the GitHub repo's `main` branch (check the latest commit on github.com).
 2. Amplify console (region **eu-central-1**) → *Create new app* → **GitHub** → authorise →
    repo `nguThapelo/SmartAppointment`, branch **main**. It detects Next.js SSR and uses the repo's `amplify.yml`.
 3. *Advanced settings* → **Environment variables** (the list `amplify.yml` passes to the app):
 
    | Variable | Value |
    |---|---|
-   | `DATABASE_URL` | Neon **pooled** string |
-   | `DIRECT_DATABASE_URL` | Neon **direct** string |
+   | `DATABASE_URL` | your RDS connection string (step 1) |
+   | `DIRECT_DATABASE_URL` | the **same** RDS connection string |
+   | `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | the admin login you want (password 10+ characters) — created on first build |
+   | `SEED_DEMO`, `SEED_DEMO_PASSWORD` | optional: `true` and a password for the demo accounts |
    | `SESSION_SECRET` | secret #1 |
    | `CRON_SECRET` | secret #2 |
    | `APP_URL` | `https://placeholder.example` for now — fixed in step 5 |
    | `S3_BUCKET_NAME` | your bucket name |
+   | `S3_REGION` | `eu-central-1` (the bucket's region) |
    | `AI_ENABLED` | `true` |
    | `GEMINI_API_KEY` | from step 7 (can add later) |
    | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | from step 6 (can add later) |
@@ -189,39 +184,57 @@ because each page makes several database queries.
 
 ---
 
-## 9. Email (optional) — Gmail SMTP
+## 9. Email (optional) — Amazon SES
 
-Password-reset links and booking notifications. Without SMTP the app works; emails are just skipped.
+Password-reset links and booking notifications. Without email settings the app works; emails are just skipped.
 
-1. Google account → *Security* → turn on 2-Step Verification → *App passwords* → create one.
-2. `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_USER=<your gmail>`, `SMTP_PASS=<app password>`,
-   `SMTP_FROM=Appointment Hub <your gmail>` → redeploy.
+1. SES console (region **eu-central-1**) → *Identities* → *Create identity* → **Email address** → your email →
+   click the link in the verification email AWS sends you.
+2. *SMTP settings* → *Create SMTP credentials* → *Create user* → copy the **SMTP username** and **SMTP password**
+   (shown once — download the file).
+3. In Amplify: `SMTP_HOST=email-smtp.eu-central-1.amazonaws.com`, `SMTP_PORT=587`,
+   `SMTP_USER=<SMTP username>`, `SMTP_PASS=<SMTP password>`, `SMTP_FROM=Appointment Hub <your verified email>`
+   → redeploy.
+4. **Sandbox:** new SES accounts can only send *to* verified addresses (verify any test recipients the same way
+   as step 1). To email anyone, *Account dashboard* → **Request production access** (free, reviewed in about a day).
 
 ---
 
-## 10. Scheduled jobs — GitHub Actions (free)
+## 10. Scheduled jobs — EventBridge Scheduler + Lambda (always free)
 
-Payment reconciliation (hourly) and clean-up (daily) run from `.github/workflows/cron.yml`.
+Amplify has no cron, so a small Lambda function calls the app's job endpoints on a schedule: payment
+reconciliation hourly, clean-up daily. Both services stay inside AWS's permanent free tier.
 
-GitHub repo → *Settings* → *Secrets and variables* → *Actions*:
-- **Secret** `CRON_SECRET` = the same value as in Amplify
-- **Variable** `APP_URL` = your app URL
+**Create the function**
+1. Lambda console (region **eu-central-1**) → *Create function* → **Author from scratch** →
+   name `appointment-hub-jobs` · runtime **Node.js 22.x** → *Create function*.
+2. *Code* tab → open `index.mjs` → replace everything with the contents of
+   [`infra/aws/scheduled-jobs-lambda.mjs`](../../infra/aws/scheduled-jobs-lambda.mjs) (open it on GitHub →
+   *Copy raw file*) → **Deploy**.
+3. *Configuration* → *General configuration* → *Edit* → Timeout **1 min** → save.
+4. *Configuration* → *Environment variables* → add `APP_URL` (your app URL) and `CRON_SECRET` (same value as in Amplify).
+5. *Test* tab → event JSON `{"jobs": ["cleanup"]}` → **Test** → expect *Succeeded*.
 
-Test once: *Actions* → *Scheduled jobs* → *Run workflow* → pick `cleanup`.
+**Create the two schedules**
+1. EventBridge console → *Scheduler* → *Schedules* → *Create schedule*:
+   - name `appointment-hub-hourly` · **Recurring schedule** · **Cron-based** `17 * * * ? *` · timezone UTC ·
+     *Flexible time window* **Off** → *Next*
+   - target **AWS Lambda – Invoke** → `appointment-hub-jobs` → payload `{"jobs": ["reconcile-payments"]}` → *Next*
+   - *Permissions* → **Create new role for this schedule** → *Next* → *Create schedule*.
+2. Repeat with name `appointment-hub-daily` · cron `43 1 * * ? *` · payload `{"jobs": ["close-completed", "cleanup"]}`.
+
+Runs and errors appear under Lambda → `appointment-hub-jobs` → *Monitor* → *View CloudWatch logs*.
 
 ---
 
 ## 11. Verify the live site
 
-```bash
-BASE=https://<your-app-url> \
-SMOKE_CLIENT_EMAIL=lerato.mokoena@example.com SMOKE_CLIENT_PASSWORD='<SEED_DEMO_PASSWORD>' \
-SMOKE_PROVIDER_EMAIL=thandi.nkosi@example.com SMOKE_PROVIDER_PASSWORD='<SEED_DEMO_PASSWORD>' \
-npm run smoke
-```
+1. Open `https://<your-app-url>/api/health` in the browser → `{"status":"ok","database":"ok"}`.
+2. Click through: book (as the demo client) → approve (as the demo provider) → pay (4242…) → complete →
+   feedback, then the AI assistant and a WhatsApp booking.
 
-Expect **12/12 checks passed**. Then click through: book → approve → pay (4242…) → complete → feedback,
-the AI assistant, and a WhatsApp booking.
+(Optional, for developers: `npm run smoke` runs 12 automated end-to-end checks against the live URL —
+see `scripts/smoke.mjs`.)
 
 ---
 
@@ -231,16 +244,18 @@ the AI assistant, and a WhatsApp booking.
 |---|---|
 | **Deploy** | Push to `main`. CI runs tests; Amplify builds, migrates and deploys. |
 | **Roll back** | Amplify → your branch → *Deployments* → pick an earlier build → *Redeploy*. |
-| **Back up before a risky change** | Neon → *Branches* → *Create branch* from `main` (instant copy-on-write snapshot). Restore by resetting `main` from it. |
+| **Back up before a risky change** | RDS → your database → *Actions* → *Take snapshot*. Automated daily backups are on by default (7-day retention). Restore = *Restore snapshot* to a new instance, then point `DATABASE_URL` at it. |
 | **Logs** | Amplify → *Monitoring* → *Hosting compute logs* (CloudWatch). Logs are JSON; search for `"level":"error"` or `"metric":"authz.denied"`. |
 | **Health** | `https://<your-app-url>/api/health` → `{"status":"ok","database":"ok"}` |
-| **Rotate a secret** | Change it in Amplify (and GitHub for `CRON_SECRET`) → redeploy. Changing `SESSION_SECRET` signs everyone out. |
+| **Rotate a secret** | Change it in Amplify (and in the Lambda for `CRON_SECRET`) → redeploy. Changing `SESSION_SECRET` signs everyone out. |
 | **Switch off AI spend/abuse** | Set `AI_ENABLED=false` → redeploy, or turn it off per user in *Users*. |
 
 ## What costs money (and how to avoid it)
 
 - **Amplify Hosting:** free tier (or new-account credits). Low traffic stays within it; the Zero-spend budget warns you otherwise.
 - **S3:** a few MB of uploads — effectively $0.
-- **Neon:** free plan (0.5 GB). No card needed.
+- **Lambda + EventBridge Scheduler:** ~750 runs a month; the permanent free tiers are 1 million and 14 million — $0.
+- **SES:** free for the first 3,000 emails a month for 12 months, then $0.10 per 1,000 — cents at most.
+- **RDS:** free for 12 months on eligible accounts (single-AZ `db.t4g.micro`/`db.t3.micro`, 20 GB). Afterwards roughly $15–19/month — stop or delete the instance if you don't need it.
 - **Stripe / Meta test number / Gemini:** free in test/free modes. **Never** put live Stripe keys in (the app refuses them anyway).
-- **Avoid:** RDS, Bedrock, NAT gateways, or a custom domain via Route 53 (~$0.50/month) — none are needed.
+- **Avoid:** Multi-AZ RDS, RDS Proxy, NAT gateways — none are needed and all cost money.

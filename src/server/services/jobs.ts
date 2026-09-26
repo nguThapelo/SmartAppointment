@@ -4,7 +4,7 @@ import { log } from "@/server/log";
 import { transition } from "@/server/services/booking";
 import { reconcilePendingPayments } from "@/server/services/payment";
 
-// Scheduled maintenance, triggered by GitHub Actions via /api/cron/<job>.
+// Scheduled maintenance, triggered by EventBridge Scheduler → Lambda via /api/cron/<job>.
 // Each job is bounded (take: N) so one run stays well inside Amplify's
 // request timeout; the next run picks up anything left over.
 

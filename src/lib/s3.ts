@@ -22,7 +22,7 @@ function bucket() {
   if (!b) throw serviceUnavailable("File storage isn't configured");
   return b;
 }
-const s3 = () => (client ??= new S3Client({ region: env().AWS_REGION }));
+const s3 = () => (client ??= new S3Client({ region: env().S3_REGION ?? env().AWS_REGION }));
 
 const realStorage: StorageGateway = {
   uploadUrl(key, contentType, size) {

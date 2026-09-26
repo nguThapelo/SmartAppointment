@@ -1,7 +1,7 @@
 /**
  * The test database URL: TEST_DATABASE_URL if set, otherwise DATABASE_URL with
  * the database name suffixed `_test`. Refuses anything that looks remote, so a
- * misconfigured .env can never wipe a Neon database.
+ * misconfigured .env can never wipe a cloud (RDS) database.
  */
 export function testDatabaseUrl(): string {
   const explicit = process.env.TEST_DATABASE_URL;

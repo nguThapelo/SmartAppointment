@@ -5,7 +5,8 @@ import { unauthorized } from "@/server/errors";
 import { runJob, JOBS } from "@/server/services/jobs";
 import { json, publicRoute } from "@/server/withApi";
 
-// Scheduled jobs, triggered by GitHub Actions (Amplify has no cron):
+// Scheduled jobs, triggered by EventBridge Scheduler → Lambda (Amplify has no cron;
+// see infra/aws/scheduled-jobs-lambda.mjs):
 //   POST /api/cron/<job>   Authorization: Bearer <CRON_SECRET>
 const jobParam = z.enum(JOBS);
 

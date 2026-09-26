@@ -94,8 +94,8 @@ webhook forgery and replay, idempotency, and the AI assistant's behaviour under 
 
 ## Deployment
 
-AWS Amplify Hosting (Next.js SSR) with PostgreSQL on Neon, file storage on S3, and scheduled jobs from GitHub
-Actions. Step-by-step instructions: [`docs/deploy/DEPLOY.md`](docs/deploy/DEPLOY.md).
+AWS Amplify Hosting (Next.js SSR) with Amazon RDS for PostgreSQL, file storage on S3, email via
+Amazon SES, and scheduled jobs from EventBridge Scheduler + Lambda. Step-by-step instructions: [`docs/deploy/DEPLOY.md`](docs/deploy/DEPLOY.md).
 
 ## Project documentation
 

@@ -163,7 +163,6 @@ Design, copied from ReportReviewAssist `/AI` and extended for writes:
 | Hosting | **Amplify Hosting** (SSR) | ✅ Legacy free tier: 1,000 build-min, 15 GB out, 500k SSR requests/mo for 12 months. A low-traffic app usually stays at or near $0 afterwards too. |
 | Files | **S3**, private bucket, presigned URLs | ✅ 5 GB on the free tier; cents afterwards |
 | Postgres | **RDS db.t4g.micro** | ⚠️ **Free for 12 months only** (legacy accounts), then roughly $12–15/mo **plus about $3.60/mo for its public IPv4**. AWS accounts created after 15 Jul 2025 get credits (up to $200 / 6 months) instead of the 12-month tier. |
-| Postgres alternative | **Neon** free tier (serverless Postgres, 0.5 GB) | ✅ Free indefinitely. Not AWS, but Prisma doesn't care, and switching back to RDS later is just a different `DATABASE_URL`. |
 | AI | Amazon **Bedrock** | ❌ Pay per token, no free tier |
 | AI alternative | **Gemini API** free tier (via the provider registry) | ✅ Free with rate limits (free-tier data may be used by Google for training, which is fine for demo data) |
 | WhatsApp | **Twilio** (current) | ⚠️ Sandbox works on trial credit, but every message costs after that |
@@ -211,7 +210,7 @@ WhatsApp bookings: PENDING → APPROVED (auto, or admin/provider confirm) → CO
 
 | Topic | Decision |
 |---|---|
-| Postgres | **Neon free tier** (Prisma; RDS remains a `DATABASE_URL` swap away) |
+| Postgres | **Amazon RDS for PostgreSQL** (Prisma), free tier for 12 months |
 | WhatsApp | **Meta WhatsApp Cloud API** (replaces Twilio) |
 | AI default provider | **Gemini free tier** via provider registry; Anthropic/OpenAI optional by key |
 | Starting point | WhatsApp work preserved on branch `whatsapp-bot-snapshot` (`25126e6`); rebuild on a new branch with a fresh Prisma schema + seed, no Supabase data migration |
