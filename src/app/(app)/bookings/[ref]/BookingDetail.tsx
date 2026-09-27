@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Bot, Clock, MessageCircle, UserRound } from "lucide-react";
 import type { Role } from "@prisma/client";
+import { AddToCalendar } from "@/components/bookings/AddToCalendar";
 import { BookingActions } from "@/components/bookings/BookingActions";
 import { ChatPanel, FeedbackPanel, FilesPanel, HistoryPanel, PaymentPanel, RescheduleButton } from "@/components/bookings/BookingPanels";
 import type { BookingDTO } from "@/components/bookings/types";
@@ -63,6 +64,7 @@ export function BookingDetail({ reference, role, tz }: { reference: string; role
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <AddToCalendar booking={b} withName={isStaff ? b.customer.name : b.provider.name} />
           <RescheduleButton booking={b} tz={tz} isCustomer={isCustomer} />
           <BookingActions booking={b} isStaff={isStaff} />
         </div>

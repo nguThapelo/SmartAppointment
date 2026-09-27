@@ -23,6 +23,7 @@ export interface Email {
   subject: string;
   text: string;
   html?: string;
+  attachments?: { filename: string; content: string; contentType: string }[];
 }
 
 /** Test hook: every email "sent" while NODE_ENV=test lands here instead. */
@@ -44,6 +45,7 @@ export async function sendEmail(email: Email): Promise<{ sent: boolean }> {
       subject: email.subject,
       text: email.text,
       html: email.html,
+      attachments: email.attachments,
     });
     return { sent: true };
   } catch (err) {

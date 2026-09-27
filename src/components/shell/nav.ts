@@ -1,7 +1,7 @@
 import type { Role } from "@prisma/client";
 import {
   BarChart3, BookOpen, Bot, CalendarClock, CalendarPlus, ClipboardList, LayoutDashboard, MessageCircle,
-  ScrollText, Settings, Star, Tags, Users, Wallet,
+  ScrollText, Settings, Smartphone, Star, Tags, Users, Wallet,
 } from "lucide-react";
 
 // Navigation per role. Hiding a link is UX only — every page and API route
@@ -39,6 +39,7 @@ export const NAV: Record<Role, NavItem[]> = {
     { href: "/admin/catalog", label: "Catalogue", icon: BookOpen },
     { href: "/feedback", label: "Feedback", icon: Star },
     { href: "/inbox", label: "WhatsApp", icon: MessageCircle },
+    { href: "/admin/whatsapp", label: "WhatsApp channels", icon: Smartphone },
     { href: "/admin/audit", label: "Audit log", icon: ScrollText },
     { href: "/admin/ai", label: "AI activity", icon: Bot },
     { href: "/assistant", label: "Assistant", icon: Bot },
