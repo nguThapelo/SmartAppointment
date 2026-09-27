@@ -11,7 +11,7 @@ import { IconButton } from "@/components/ui/button";
 import { Tooltip } from "@/components/ui/tooltip";
 import { api } from "@/lib/api";
 import { cx } from "@/lib/format";
-import { NAV } from "./nav";
+import { NAV, type Features } from "./nav";
 
 export interface ShellUser {
   firstName: string;
@@ -24,6 +24,10 @@ export interface ShellUser {
 const UserContext = createContext<ShellUser | null>(null);
 /** The signed-in user, for display only. Authorization always happens on the server. */
 export const useUser = () => useContext(UserContext)!;
+
+const FeaturesContext = createContext<Features>({ whatsapp: false });
+/** Which optional integrations are live, e.g. to show "coming soon" instead of WhatsApp. */
+export const useFeatures = () => useContext(FeaturesContext);
 
 const ROLE_LABEL: Record<Role, string> = { CLIENT: "Client", PROVIDER: "Provider", ADMIN: "Administrator" };
 
@@ -42,7 +46,7 @@ function Avatar({ user, size = "md" }: { user: ShellUser; size?: "sm" | "md" }) 
   );
 }
 
-export function AppShell({ user, children }: { user: ShellUser; children: ReactNode }) {
+export function AppShell({ user, features, children }: { user: ShellUser; features: Features; children: ReactNode }) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -61,8 +65,10 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
 
   const nav = (wide: boolean) => (
     <nav aria-label="Main" className={cx("flex flex-1 flex-col gap-1 px-3 py-2", wide ? "scroll-thin overflow-y-auto" : "overflow-visible")}>
-      {items.map(({ href, label, icon: Icon }) => {
+      {items.map(({ href, label: name, icon: Icon, feature }) => {
         const active = isActive(href);
+        const soon = feature !== undefined && !features[feature];
+        const label = soon ? `${name} (coming soon)` : name;
         const row = (
           <Link
             href={href}
@@ -84,7 +90,8 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
             >
               <Icon className="size-[18px]" aria-hidden />
             </span>
-            {wide && <span className="truncate">{label}</span>}
+            {wide && <span className="truncate">{name}</span>}
+            {wide && soon && <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/60">Soon</span>}
           </Link>
         );
         return wide ? (
@@ -132,6 +139,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
 
   return (
     <UserContext.Provider value={user}>
+      <FeaturesContext.Provider value={features}>
       <div className="flex min-h-screen bg-ink-50">
         {/* Desktop sidebar: full panel or icon rail */}
         <aside
@@ -251,6 +259,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
           </div>
         )}
       </div>
+      </FeaturesContext.Provider>
     </UserContext.Provider>
   );
 }

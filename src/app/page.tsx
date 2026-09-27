@@ -5,10 +5,11 @@ import {
 import { Logo } from "@/components/brand";
 import { ButtonLink } from "@/components/ui/button";
 import { getPageUser } from "@/server/auth/page";
+import { isConfigured } from "@/server/env";
 
 const FEATURES = [
   { icon: CalendarCheck2, title: "Book on the web", body: "Pick a service, a provider and a genuinely free slot. Providers approve, reschedule and get paid in one place.", tone: "from-brand-400 to-cyan-500", glow: "shadow-glow" },
-  { icon: MessageCircle, title: "Or on WhatsApp", body: "Customers book, check, move and cancel by chatting — same rules, same calendar as the website.", tone: "from-emerald-400 to-green-600", glow: "shadow-[0_8px_24px_-6px_rgb(16_185_129/0.45)]" },
+  { icon: MessageCircle, title: "Or on WhatsApp", body: "Customers book, check, move and cancel by chatting — same rules, same calendar as the website.", whatsapp: true, tone: "from-emerald-400 to-green-600", glow: "shadow-[0_8px_24px_-6px_rgb(16_185_129/0.45)]" },
   { icon: Sparkles, title: "Or just ask AI", body: "An assistant that searches, checks availability and prepares bookings — and always asks you to confirm.", tone: "from-accent-400 to-fuchsia-500", glow: "shadow-glow-accent" },
   { icon: CreditCard, title: "Paid securely", body: "Send a secure payment link in one click. Bookings update the moment a payment comes through.", tone: "from-sky-400 to-blue-600", glow: "shadow-[0_8px_24px_-6px_rgb(2_132_199/0.45)]" },
 ];
@@ -22,12 +23,20 @@ const STEPS = [
 const BENEFITS = [
   { icon: CalendarCheck2, title: "Never double-booked", body: "Your calendar only ever offers times that are genuinely free." },
   { icon: CreditCard, title: "Get paid on time", body: "Request payment with one click and see the moment it lands." },
-  { icon: MessageCircle, title: "Meet clients on WhatsApp", body: "Let customers book, move or cancel right from a chat." },
+  { icon: MessageCircle, title: "Meet clients on WhatsApp", body: "Let customers book, move or cancel right from a chat.", whatsapp: true },
   { icon: Star, title: "Feedback that helps you grow", body: "Collect ratings after every appointment with your own questions." },
 ];
 
+function SoonChip({ dark = false }: { dark?: boolean }) {
+  return (
+    <span className={dark ? "rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-white/80 ring-1 ring-white/15" : "rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200"}>
+      Coming soon
+    </span>
+  );
+}
+
 /** A static product preview for the hero — pure markup, no data. */
-function HeroPreview() {
+function HeroPreview({ whatsapp }: { whatsapp: boolean }) {
   return (
     <div className="relative mx-auto w-full max-w-md lg:max-w-none" aria-hidden>
       <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-brand-300/40 via-cyan-200/30 to-accent-300/40 blur-2xl" />
@@ -60,12 +69,12 @@ function HeroPreview() {
           </div>
         </div>
       </div>
-      <div className="absolute -bottom-8 -left-6 hidden w-60 rotate-[-4deg] rounded-2xl bg-[#e7ffdb] p-3 text-xs text-ink-800 shadow-lift ring-1 ring-emerald-200 sm:block">
+      {whatsapp && <div className="absolute -bottom-8 -left-6 hidden w-60 rotate-[-4deg] rounded-2xl bg-[#e7ffdb] p-3 text-xs text-ink-800 shadow-lift ring-1 ring-emerald-200 sm:block">
         <p className="flex items-center gap-1.5 font-semibold text-emerald-700"><MessageCircle className="size-3.5" /> WhatsApp</p>
         <p className="mt-1">✅ You’re booked! Your reference is <span className="font-mono font-semibold">AH-7K3P9Q</span>.</p>
-      </div>
+      </div>}
       <div className="absolute -right-4 -top-6 hidden items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-ink-800 shadow-lift ring-1 ring-ink-200 sm:flex">
-        <Star className="size-3.5 fill-amber-400 text-amber-400" /> 3 channels · 1 calendar
+        <Star className="size-3.5 fill-amber-400 text-amber-400" /> {whatsapp ? "3 channels" : "Web + AI"} · 1 calendar
       </div>
     </div>
   );
@@ -73,6 +82,8 @@ function HeroPreview() {
 
 export default async function Home() {
   const user = await getPageUser();
+  // WhatsApp is shown as "coming soon" until its Meta credentials are configured.
+  const whatsapp = isConfigured.whatsapp();
   return (
     <div className="min-h-screen overflow-hidden bg-white">
       <div className="bg-hero-gradient">
@@ -94,7 +105,7 @@ export default async function Home() {
           <div className="animate-fade-up">
             <p className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-1.5 text-sm font-semibold text-ink-700 shadow-soft ring-1 ring-ink-200 backdrop-blur">
               <span className="grid size-5 place-items-center rounded-full bg-accent-gradient text-white"><Sparkles className="size-3" /></span>
-              Web · WhatsApp · AI assistant
+              {whatsapp ? "Web · WhatsApp · AI assistant" : "Web · AI assistant · WhatsApp soon"}
             </p>
             <h1 className="text-5xl font-extrabold leading-[1.05] tracking-tight text-ink-900 sm:text-6xl">
               Appointments that <span className="text-gradient">book themselves</span> — safely.
@@ -114,7 +125,7 @@ export default async function Home() {
               ))}
             </p>
           </div>
-          <HeroPreview />
+          <HeroPreview whatsapp={whatsapp} />
         </section>
       </div>
 
@@ -125,12 +136,12 @@ export default async function Home() {
           <p className="mt-4 text-ink-500">Whether a client taps, texts or asks — the booking lands in the same place, under the same rules.</p>
         </div>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map(({ icon: Icon, title, body, tone, glow }) => (
+          {FEATURES.map(({ icon: Icon, title, body, tone, glow, whatsapp: waOnly }) => (
             <div key={title} className="group rounded-3xl border border-ink-200/70 bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lift">
               <span className={`grid size-12 place-items-center rounded-2xl bg-gradient-to-br ${tone} ${glow} text-white transition-transform duration-300 group-hover:scale-110`}>
                 <Icon className="size-6" aria-hidden />
               </span>
-              <h3 className="mt-5 text-lg font-bold text-ink-900">{title}</h3>
+              <h3 className="mt-5 flex items-center gap-2 text-lg font-bold text-ink-900">{title}{waOnly && !whatsapp && <SoonChip />}</h3>
               <p className="mt-2 text-sm leading-relaxed text-ink-600">{body}</p>
             </div>
           ))}
@@ -173,10 +184,10 @@ export default async function Home() {
             </div>
           </div>
           <ul className="grid gap-3 sm:grid-cols-2">
-            {BENEFITS.map(({ icon: Icon, title, body }) => (
+            {BENEFITS.map(({ icon: Icon, title, body, whatsapp: waOnly }) => (
               <li key={title} className="rounded-2xl bg-white/[0.05] p-5 ring-1 ring-white/10 transition hover:bg-white/[0.08]">
                 <span className="grid size-10 place-items-center rounded-xl bg-brand-400/20 text-brand-200"><Icon className="size-5" aria-hidden /></span>
-                <h3 className="mt-4 font-semibold text-white">{title}</h3>
+                <h3 className="mt-4 flex items-center gap-2 font-semibold text-white">{title}{waOnly && !whatsapp && <SoonChip dark />}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-white/65">{body}</p>
               </li>
             ))}

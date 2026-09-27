@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader, Stat } from "@/components/ui/card";
 import { ErrorNote, Loading, Notice, Skeleton } from "@/components/ui/feedback";
+import { useFeatures } from "@/components/shell/AppShell";
 import { api, errorMessage } from "@/lib/api";
 import { dateOnly, money, STATUS_LABEL, timeOnly } from "@/lib/format";
 
@@ -78,6 +79,7 @@ const useBookings = (query: string) =>
 // ── Client ──────────────────────────────────────────────────────────────────
 
 export function ClientDashboard({ firstName, tz, denied }: Props) {
+  const features = useFeatures();
   const upcoming = useBookings("scope=upcoming&pageSize=5");
   const spending = useQuery({ queryKey: ["spending"], queryFn: () => api<MoneySummary>("/api/reports/spending?days=365") });
   const next = upcoming.data?.data[0];
@@ -148,7 +150,11 @@ export function ClientDashboard({ firstName, tz, denied }: Props) {
             </div>
             <div className="flex gap-3 rounded-xl bg-emerald-50 p-3 ring-1 ring-emerald-100">
               <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-[0_8px_20px_-6px_rgb(16_185_129/0.5)]"><MessageCircle className="size-4" /></span>
-              <p className="text-sm text-ink-700">Message a provider’s WhatsApp number and follow the menu.</p>
+              {features.whatsapp ? (
+                <p className="text-sm text-ink-700">Message a provider’s WhatsApp number and follow the menu.</p>
+              ) : (
+                <p className="text-sm text-ink-700">Booking on WhatsApp is <span className="font-medium">coming soon</span>.</p>
+              )}
             </div>
           </CardBody>
         </Card>

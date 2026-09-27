@@ -3,6 +3,7 @@ import { z, type ZodTypeAny } from "zod";
 import type { Actor } from "@/server/auth/currentUser";
 import type { ServiceActor, ServiceCtx } from "@/server/actors";
 import { prisma } from "@/lib/db";
+import { isConfigured } from "@/server/env";
 import { forbidden, notFound } from "@/server/errors";
 import { getSlots } from "@/server/services/availability";
 import * as bookings from "@/server/services/booking";
@@ -231,7 +232,13 @@ const helpTool = define({
   kind: "read",
   roles: ALL,
   input: z.object({ topic: z.enum(Object.keys(HELP_TOPICS) as [string, ...string[]]) }).strict(),
-  read: async (_a, { topic }) => ({ topic, help: HELP_TOPICS[topic as keyof typeof HELP_TOPICS] }),
+  read: async (_a, { topic }) => ({
+    topic,
+    help:
+      topic === "whatsapp" && !isConfigured.whatsapp()
+        ? "Booking by WhatsApp is coming soon. For now, book on the website or ask me."
+        : HELP_TOPICS[topic as keyof typeof HELP_TOPICS],
+  }),
 });
 
 // ── Write tools (preview → user confirms → execute) ─────────────────────────

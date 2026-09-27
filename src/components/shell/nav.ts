@@ -1,7 +1,7 @@
 import type { Role } from "@prisma/client";
 import {
   BarChart3, BookOpen, Bot, CalendarClock, CalendarPlus, ClipboardList, LayoutDashboard, MessageCircle,
-  ScrollText, Settings, Smartphone, Star, Tags, Users, Wallet,
+  ScrollText, Settings, Star, Tags, Users, Wallet,
 } from "lucide-react";
 
 // Navigation per role. Hiding a link is UX only — every page and API route
@@ -11,6 +11,13 @@ export interface NavItem {
   href: string;
   label: string;
   icon: typeof LayoutDashboard;
+  /** Shown with a "Soon" chip until this feature is configured. */
+  feature?: keyof Features;
+}
+
+/** Optional integrations the UI adapts to (decided on the server from env). */
+export interface Features {
+  whatsapp: boolean;
 }
 
 export const NAV: Record<Role, NavItem[]> = {
@@ -27,7 +34,7 @@ export const NAV: Record<Role, NavItem[]> = {
     { href: "/provider/services", label: "Services & prices", icon: Tags },
     { href: "/provider/availability", label: "Availability", icon: CalendarClock },
     { href: "/feedback", label: "Feedback", icon: Star },
-    { href: "/inbox", label: "WhatsApp", icon: MessageCircle },
+    { href: "/inbox", label: "WhatsApp", icon: MessageCircle, feature: "whatsapp" },
     { href: "/earnings", label: "Earnings", icon: Wallet },
     { href: "/assistant", label: "Assistant", icon: Bot },
     { href: "/account", label: "Account", icon: Settings },
@@ -38,8 +45,7 @@ export const NAV: Record<Role, NavItem[]> = {
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/catalog", label: "Catalogue", icon: BookOpen },
     { href: "/feedback", label: "Feedback", icon: Star },
-    { href: "/inbox", label: "WhatsApp", icon: MessageCircle },
-    { href: "/admin/whatsapp", label: "WhatsApp channels", icon: Smartphone },
+    { href: "/inbox", label: "WhatsApp", icon: MessageCircle, feature: "whatsapp" },
     { href: "/admin/audit", label: "Audit log", icon: ScrollText },
     { href: "/admin/ai", label: "AI activity", icon: Bot },
     { href: "/assistant", label: "Assistant", icon: Bot },

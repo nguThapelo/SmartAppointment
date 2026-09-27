@@ -9,7 +9,7 @@ const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakart
 
 export const metadata: Metadata = {
   title: { default: "Appointment Hub", template: "%s · Appointment Hub" },
-  description: "Book, manage and get paid for appointments — on the web, on WhatsApp, or by asking the AI assistant.",
+  description: "Book, manage and get paid for appointments — online, or just by asking the AI assistant.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

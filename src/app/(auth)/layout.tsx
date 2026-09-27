@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 import { CalendarCheck2, MessageCircle, ShieldCheck, Sparkles } from "lucide-react";
 import { Logo } from "@/components/brand";
+import { isConfigured } from "@/server/env";
 
 // Split screen: brand story on the left (desktop), frosted-glass form card on
 // a glowing gradient backdrop (peach-payment AuthShell style).
 const POINTS = [
   { icon: CalendarCheck2, text: "Real-time availability — never double-booked" },
-  { icon: MessageCircle, text: "Book, move or cancel right from WhatsApp" },
+  { icon: MessageCircle, text: "Book, move or cancel right from WhatsApp", whatsapp: true },
   { icon: Sparkles, text: "A smart assistant that books for you" },
   { icon: ShieldCheck, text: "Secure online payments" },
 ];
@@ -26,10 +27,11 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </h2>
           <p className="mt-4 text-white/65">Bookings, payments and client messages — all in one place, on any device.</p>
           <ul className="mt-8 space-y-4">
-            {POINTS.map(({ icon: Icon, text }) => (
+            {POINTS.map(({ icon: Icon, text, whatsapp }) => (
               <li key={text} className="flex items-center gap-3 text-sm text-white/85">
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 ring-1 ring-white/15"><Icon className="size-4 text-brand-200" /></span>
                 {text}
+                {whatsapp && !isConfigured.whatsapp() && <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-white/80 ring-1 ring-white/15">Coming soon</span>}
               </li>
             ))}
           </ul>

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CalendarPlus } from "lucide-react";
 import type { Role } from "@prisma/client";
 import { BookingList } from "@/components/bookings/BookingList";
+import { useFeatures } from "@/components/shell/AppShell";
 import type { BookingDTO, Paged } from "@/components/bookings/types";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, PageHeader } from "@/components/ui/card";
@@ -20,6 +21,7 @@ const SCOPES = [
 ] as const;
 
 export function BookingsBrowser({ role, tz }: { role: Role; tz: string }) {
+  const features = useFeatures();
   const [scope, setScope] = useState<(typeof SCOPES)[number]["value"]>("upcoming");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
@@ -34,7 +36,7 @@ export function BookingsBrowser({ role, tz }: { role: Role; tz: string }) {
     <>
       <PageHeader
         title={role === "CLIENT" ? "My bookings" : "Bookings"}
-        description={role === "ADMIN" ? "Every booking on the platform." : role === "PROVIDER" ? "Bookings with you, from the web, WhatsApp and the assistant." : undefined}
+        description={role === "ADMIN" ? "Every booking on the platform." : role === "PROVIDER" ? `Bookings with you, from the web${features.whatsapp ? ", WhatsApp" : ""} and the assistant.` : undefined}
         action={role === "CLIENT" ? <ButtonLink href="/book" icon={<CalendarPlus className="size-4" />}>New booking</ButtonLink> : undefined}
       />
       <div className="mb-4 flex flex-wrap items-center gap-3">
